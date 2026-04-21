@@ -1,0 +1,354 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ======================================================
+// 0. USERS
+// ======================================================
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @map("Username") @db.VarChar(100)
+  passwordHash String   @map("PasswordHash") @db.VarChar(255)
+  role         String?  @map("Role") @db.VarChar(50)
+  status       Int      @default(1) @map("Status")
+  createdAt    DateTime @default(now()) @map("CreatedAt")
+
+  purchaseOrders PurchaseOrder[]
+  goodsReceipts  GoodsReceipt[]
+  salesOrders    SalesOrder[]
+  deliveryNotes  DeliveryNote[]
+
+  @@map("Users")
+}
+
+// ======================================================
+// 1. NHÓM DANH MỤC
+// ======================================================
+model ProductCategory {
+  id           Int       @id @default(autoincrement())
+  categoryName String    @map("CategoryName") @db.VarChar(100)
+  description  String?   @map("Description") @db.Text
+  status       Int       @default(1) @map("Status")
+  createdAt    DateTime  @default(now()) @map("CreatedAt")
+  updatedAt    DateTime  @updatedAt @map("UpdatedAt")
+  isDeleted    Boolean   @default(false) @map("IsDeleted")
+
+  products Product[]
+
+  @@map("ProductCategories")
+}
+
+model Unit {
+  id       Int     @id @default(autoincrement())
+  unitName String  @map("UnitName") @db.VarChar(50)
+  symbol   String? @map("Symbol") @db.VarChar(10)
+
+  products Product[]
+
+  @@map("Units")
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  productCode String    @unique @map("ProductCode") @db.VarChar(50)
+  productName String    @map("ProductName") @db.VarChar(255)
+  categoryId  Int?      @map("CategoryID")
+  unitId      Int?      @map("UnitID")
+  price       Decimal   @default(0) @map("Price") @db.Decimal(18, 2)
+  description String?   @map("Description") @db.Text
+  status      Int       @default(1) @map("Status")
+  createdAt   DateTime  @default(now()) @map("CreatedAt")
+  updatedAt   DateTime  @updatedAt @map("UpdatedAt")
+  isDeleted   Boolean   @default(false) @map("IsDeleted")
+
+  category             ProductCategory?       @relation(fields: [categoryId], references: [id])
+  unit                 Unit?                   @relation(fields: [unitId], references: [id])
+  purchaseOrderDetails PurchaseOrderDetail[]
+  goodsReceiptDetails  GoodsReceiptDetail[]
+  salesOrderDetails    SalesOrderDetail[]
+  deliveryNoteDetails  DeliveryNoteDetail[]
+  inventories          Inventory[]
+  inventoryTransactions InventoryTransaction[]
+  stockReservations    StockReservation[]
+
+  @@index([productCode], map: "idx_product_code")
+  @@map("Products")
+}
+
+// ======================================================
+// 2. NHÓM KHO BÃI
+// ======================================================
+model Warehouse {
+  id            Int       @id @default(autoincrement())
+  warehouseName String    @map("WarehouseName") @db.VarChar(100)
+  address       String?   @map("Address") @db.VarChar(255)
+  phone         String?   @map("Phone") @db.VarChar(20)
+  managerName   String?   @map("ManagerName") @db.VarChar(100)
+  status        Int       @default(1) @map("Status")
+  createdAt     DateTime  @default(now()) @map("CreatedAt")
+  updatedAt     DateTime  @updatedAt @map("UpdatedAt")
+
+  locations             Location[]
+  inventories           Inventory[]
+  inventoryTransactions InventoryTransaction[]
+  stockReservations     StockReservation[]
+
+  @@map("Warehouses")
+}
+
+model Location {
+  id           Int       @id @default(autoincrement())
+  warehouseId  Int?      @map("WarehouseID")
+  locationCode String    @map("LocationCode") @db.VarChar(50)
+  description  String?   @map("Description") @db.Text
+  capacity     Int       @default(0) @map("Capacity")
+  status       Int       @default(1) @map("Status")
+  createdAt    DateTime  @default(now()) @map("CreatedAt")
+  updatedAt    DateTime  @updatedAt @map("UpdatedAt")
+
+  warehouse           Warehouse?           @relation(fields: [warehouseId], references: [id])
+  goodsReceiptDetails GoodsReceiptDetail[]
+  deliveryNoteDetails DeliveryNoteDetail[]
+  inventories         Inventory[]
+  stockReservations   StockReservation[]
+
+  @@map("Locations")
+}
+
+// ======================================================
+// 3. ĐỐI TÁC
+// ======================================================
+model Supplier {
+  id           Int       @id @default(autoincrement())
+  supplierCode String    @unique @map("SupplierCode") @db.VarChar(50)
+  name         String    @map("Name") @db.VarChar(255)
+  phone        String?   @map("Phone") @db.VarChar(20)
+  email        String?   @map("Email") @db.VarChar(100)
+  address      String?   @map("Address") @db.VarChar(255)
+  status       Int       @default(1) @map("Status")
+  createdAt    DateTime  @default(now()) @map("CreatedAt")
+  isDeleted    Boolean   @default(false) @map("IsDeleted")
+
+  purchaseOrders PurchaseOrder[]
+
+  @@map("Suppliers")
+}
+
+model Customer {
+  id           Int       @id @default(autoincrement())
+  customerCode String    @unique @map("CustomerCode") @db.VarChar(50)
+  name         String    @map("Name") @db.VarChar(255)
+  phone        String?   @map("Phone") @db.VarChar(20)
+  email        String?   @map("Email") @db.VarChar(100)
+  address      String?   @map("Address") @db.VarChar(255)
+  status       Int       @default(1) @map("Status")
+  createdAt    DateTime  @default(now()) @map("CreatedAt")
+  isDeleted    Boolean   @default(false) @map("IsDeleted")
+
+  salesOrders SalesOrder[]
+
+  @@map("Customers")
+}
+
+// ======================================================
+// 4. PURCHASE
+// ======================================================
+model PurchaseOrder {
+  id          Int       @id @default(autoincrement())
+  poCode      String    @unique @map("POCode") @db.VarChar(50)
+  supplierId  Int?      @map("SupplierID")
+  orderDate   DateTime  @map("OrderDate") @db.Date
+  status      String    @default("Pending") @map("Status") @db.VarChar(20)
+  totalAmount Decimal   @default(0) @map("TotalAmount") @db.Decimal(18, 2)
+  note        String?   @map("Note") @db.Text
+  createdBy   Int?      @map("CreatedBy")
+  createdAt   DateTime  @default(now()) @map("CreatedAt")
+  updatedAt   DateTime  @updatedAt @map("UpdatedAt")
+
+  supplier      Supplier?             @relation(fields: [supplierId], references: [id])
+  createdByUser User?                 @relation(fields: [createdBy], references: [id])
+  details       PurchaseOrderDetail[]
+  goodsReceipts GoodsReceipt[]
+
+  @@map("PurchaseOrders")
+}
+
+model PurchaseOrderDetail {
+  id         Int      @id @default(autoincrement())
+  poId       Int?     @map("POID")
+  productId  Int?     @map("ProductID")
+  quantity   Int      @map("Quantity")
+  unitPrice  Decimal  @map("UnitPrice") @db.Decimal(18, 2)
+  totalPrice Decimal? @map("TotalPrice") @db.Decimal(18, 2)
+
+  purchaseOrder PurchaseOrder? @relation(fields: [poId], references: [id])
+  product       Product?       @relation(fields: [productId], references: [id])
+
+  @@map("PurchaseOrderDetails")
+}
+
+model GoodsReceipt {
+  id          Int       @id @default(autoincrement())
+  receiptCode String    @unique @map("ReceiptCode") @db.VarChar(50)
+  poId        Int?      @map("POID")
+  receiptDate DateTime  @map("ReceiptDate") @db.Date
+  status      String?   @map("Status") @db.VarChar(20)
+  note        String?   @map("Note") @db.Text
+  createdBy   Int?      @map("CreatedBy")
+  createdAt   DateTime  @default(now()) @map("CreatedAt")
+
+  purchaseOrder PurchaseOrder?       @relation(fields: [poId], references: [id])
+  createdByUser User?                @relation(fields: [createdBy], references: [id])
+  details       GoodsReceiptDetail[]
+
+  @@map("GoodsReceipts")
+}
+
+model GoodsReceiptDetail {
+  id         Int  @id @default(autoincrement())
+  receiptId  Int? @map("ReceiptID")
+  productId  Int? @map("ProductID")
+  locationId Int? @map("LocationID")
+  quantity   Int  @map("Quantity")
+
+  goodsReceipt GoodsReceipt? @relation(fields: [receiptId], references: [id])
+  product      Product?      @relation(fields: [productId], references: [id])
+  location     Location?     @relation(fields: [locationId], references: [id])
+
+  @@map("GoodsReceiptDetails")
+}
+
+// ======================================================
+// 5. SALES
+// ======================================================
+model SalesOrder {
+  id          Int       @id @default(autoincrement())
+  soCode      String    @unique @map("SOCode") @db.VarChar(50)
+  customerId  Int?      @map("CustomerID")
+  orderDate   DateTime  @map("OrderDate") @db.Date
+  status      String    @default("Pending") @map("Status") @db.VarChar(20)
+  totalAmount Decimal   @default(0) @map("TotalAmount") @db.Decimal(18, 2)
+  note        String?   @map("Note") @db.Text
+  createdBy   Int?      @map("CreatedBy")
+  createdAt   DateTime  @default(now()) @map("CreatedAt")
+
+  customer      Customer?           @relation(fields: [customerId], references: [id])
+  createdByUser User?               @relation(fields: [createdBy], references: [id])
+  details       SalesOrderDetail[]
+  deliveryNotes DeliveryNote[]
+
+  @@map("SalesOrders")
+}
+
+model SalesOrderDetail {
+  id         Int      @id @default(autoincrement())
+  soId       Int?     @map("SOID")
+  productId  Int?     @map("ProductID")
+  quantity   Int      @map("Quantity")
+  unitPrice  Decimal  @map("UnitPrice") @db.Decimal(18, 2)
+  totalPrice Decimal? @map("TotalPrice") @db.Decimal(18, 2)
+
+  salesOrder SalesOrder? @relation(fields: [soId], references: [id])
+  product    Product?    @relation(fields: [productId], references: [id])
+
+  @@map("SalesOrderDetails")
+}
+
+model DeliveryNote {
+  id           Int       @id @default(autoincrement())
+  deliveryCode String    @unique @map("DeliveryCode") @db.VarChar(50)
+  soId         Int?      @map("SOID")
+  deliveryDate DateTime  @map("DeliveryDate") @db.Date
+  status       String?   @map("Status") @db.VarChar(20)
+  note         String?   @map("Note") @db.Text
+  createdBy    Int?      @map("CreatedBy")
+  createdAt    DateTime  @default(now()) @map("CreatedAt")
+
+  salesOrder    SalesOrder?          @relation(fields: [soId], references: [id])
+  createdByUser User?                @relation(fields: [createdBy], references: [id])
+  details       DeliveryNoteDetail[]
+
+  @@map("DeliveryNotes")
+}
+
+model DeliveryNoteDetail {
+  id         Int  @id @default(autoincrement())
+  deliveryId Int? @map("DeliveryID")
+  productId  Int? @map("ProductID")
+  locationId Int? @map("LocationID")
+  quantity   Int  @map("Quantity")
+
+  deliveryNote DeliveryNote? @relation(fields: [deliveryId], references: [id])
+  product      Product?      @relation(fields: [productId], references: [id])
+  location     Location?     @relation(fields: [locationId], references: [id])
+
+  @@map("DeliveryNoteDetails")
+}
+
+// ======================================================
+// 6. INVENTORY
+// ======================================================
+model Inventory {
+  id          Int       @id @default(autoincrement())
+  productId   Int?      @map("ProductID")
+  warehouseId Int?      @map("WarehouseID")
+  locationId  Int?      @map("LocationID")
+  quantity    Int       @default(0) @map("Quantity")
+  lastUpdated DateTime  @updatedAt @map("LastUpdated")
+
+  product   Product?   @relation(fields: [productId], references: [id])
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
+  location  Location?  @relation(fields: [locationId], references: [id])
+
+  @@unique([productId, warehouseId, locationId])
+  @@index([productId, warehouseId, locationId], map: "idx_inventory_main")
+  @@map("Inventory")
+}
+
+model InventoryTransaction {
+  id              Int       @id @default(autoincrement())
+  productId       Int?      @map("ProductID")
+  warehouseId     Int?      @map("WarehouseID")
+  quantity        Int       @map("Quantity")
+  transactionType String?   @map("TransactionType") @db.VarChar(50)
+  referenceType   String?   @map("ReferenceType") @db.VarChar(50)
+  referenceId     Int?      @map("ReferenceID")
+  transactionDate DateTime  @default(now()) @map("TransactionDate")
+  note            String?   @map("Note") @db.Text
+
+  product   Product?   @relation(fields: [productId], references: [id])
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
+
+  @@index([productId], map: "idx_transaction_product")
+  @@index([transactionDate], map: "idx_transaction_date")
+  @@map("InventoryTransactions")
+}
+
+// ======================================================
+// 7. STOCK RESERVATION
+// ======================================================
+model StockReservation {
+  id            Int       @id @default(autoincrement())
+  productId     Int?      @map("ProductID")
+  warehouseId   Int?      @map("WarehouseID")
+  locationId    Int?      @map("LocationID")
+  reservedQty   Int       @map("ReservedQty")
+  referenceType String?   @map("ReferenceType") @db.VarChar(50)
+  referenceId   Int?      @map("ReferenceID")
+  status        String?   @map("Status") @db.VarChar(20)
+  createdAt     DateTime  @default(now()) @map("CreatedAt")
+
+  product   Product?   @relation(fields: [productId], references: [id])
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
+  location  Location?  @relation(fields: [locationId], references: [id])
+
+  @@map("StockReservations")
+}
