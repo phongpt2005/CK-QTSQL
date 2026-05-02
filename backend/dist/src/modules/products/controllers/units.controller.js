@@ -18,6 +18,8 @@ const swagger_1 = require("@nestjs/swagger");
 const units_service_1 = require("../services/units.service");
 const dto_1 = require("../dto");
 const jwt_auth_guard_1 = require("../../../common/guards/jwt-auth.guard");
+const roles_guard_1 = require("../../../common/guards/roles.guard");
+const roles_decorator_1 = require("../../../common/decorators/roles.decorator");
 let UnitsController = class UnitsController {
     unitsService;
     constructor(unitsService) {
@@ -57,6 +59,7 @@ __decorate([
 ], UnitsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)('Admin'),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new unit' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -65,6 +68,7 @@ __decorate([
 ], UnitsController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
+    (0, roles_decorator_1.Roles)('Admin'),
     (0, swagger_1.ApiOperation)({ summary: 'Update a unit' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -74,6 +78,7 @@ __decorate([
 ], UnitsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, roles_decorator_1.Roles)('Admin'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete a unit' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -84,7 +89,7 @@ exports.UnitsController = UnitsController = __decorate([
     (0, swagger_1.ApiTags)('Units'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('units'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [units_service_1.UnitsService])
 ], UnitsController);
 //# sourceMappingURL=units.controller.js.map

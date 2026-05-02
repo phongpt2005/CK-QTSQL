@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InventoryModule = void 0;
 const common_1 = require("@nestjs/common");
 const inventory_service_1 = require("./inventory.service");
+const inventory_report_service_1 = require("./services/inventory-report.service");
 const inventory_controller_1 = require("./inventory.controller");
 let InventoryModule = class InventoryModule {
 };
@@ -16,8 +17,8 @@ exports.InventoryModule = InventoryModule;
 exports.InventoryModule = InventoryModule = __decorate([
     (0, common_1.Module)({
         controllers: [inventory_controller_1.InventoryController],
-        providers: [inventory_service_1.InventoryService],
-        exports: [inventory_service_1.InventoryService],
+        providers: [inventory_service_1.InventoryService, inventory_report_service_1.InventoryReportService],
+        exports: [inventory_service_1.InventoryService, inventory_report_service_1.InventoryReportService],
     })
 ], InventoryModule);
 //# sourceMappingURL=inventory.module.js.map

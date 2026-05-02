@@ -18,6 +18,8 @@ const swagger_1 = require("@nestjs/swagger");
 const suppliers_service_1 = require("../services/suppliers.service");
 const dto_1 = require("../dto");
 const jwt_auth_guard_1 = require("../../../common/guards/jwt-auth.guard");
+const roles_guard_1 = require("../../../common/guards/roles.guard");
+const roles_decorator_1 = require("../../../common/decorators/roles.decorator");
 let SuppliersController = class SuppliersController {
     suppliersService;
     constructor(suppliersService) {
@@ -57,6 +59,7 @@ __decorate([
 ], SuppliersController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)('Admin'),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new supplier' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -65,6 +68,7 @@ __decorate([
 ], SuppliersController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
+    (0, roles_decorator_1.Roles)('Admin'),
     (0, swagger_1.ApiOperation)({ summary: 'Update a supplier' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -74,7 +78,8 @@ __decorate([
 ], SuppliersController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Soft delete a supplier' }),
+    (0, roles_decorator_1.Roles)('Admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Hard delete a supplier' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
@@ -84,7 +89,7 @@ exports.SuppliersController = SuppliersController = __decorate([
     (0, swagger_1.ApiTags)('Suppliers'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('suppliers'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [suppliers_service_1.SuppliersService])
 ], SuppliersController);
 //# sourceMappingURL=suppliers.controller.js.map

@@ -198,6 +198,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ example: 'SUP001' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.Matches)(/^SUP/, { message: 'Mã nhà cung cấp phải bắt đầu bằng SUP' }),
     __metadata("design:type", String)
 ], CreateSupplierDto.prototype, "supplierCode", void 0);
 __decorate([
@@ -210,12 +211,13 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '0901234567' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' }),
     __metadata("design:type", String)
 ], CreateSupplierDto.prototype, "phone", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'acme@example.com' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEmail)({}, { message: 'Email không đúng định dạng' }),
     __metadata("design:type", String)
 ], CreateSupplierDto.prototype, "email", void 0);
 __decorate([
@@ -242,12 +244,13 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '0909876543' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' }),
     __metadata("design:type", String)
 ], UpdateSupplierDto.prototype, "phone", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'new@example.com' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEmail)({}, { message: 'Email không đúng định dạng' }),
     __metadata("design:type", String)
 ], UpdateSupplierDto.prototype, "email", void 0);
 __decorate([
@@ -275,6 +278,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ example: 'CUS001' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.Matches)(/^CUS/, { message: 'Mã khách hàng phải bắt đầu bằng CUS' }),
     __metadata("design:type", String)
 ], CreateCustomerDto.prototype, "customerCode", void 0);
 __decorate([
@@ -287,12 +291,13 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '0901234567' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' }),
     __metadata("design:type", String)
 ], CreateCustomerDto.prototype, "phone", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'john@example.com' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEmail)({}, { message: 'Email không đúng định dạng' }),
     __metadata("design:type", String)
 ], CreateCustomerDto.prototype, "email", void 0);
 __decorate([
@@ -319,12 +324,13 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '0909876543' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' }),
     __metadata("design:type", String)
 ], UpdateCustomerDto.prototype, "phone", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'jane@example.com' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEmail)({}, { message: 'Email không đúng định dạng' }),
     __metadata("design:type", String)
 ], UpdateCustomerDto.prototype, "email", void 0);
 __decorate([

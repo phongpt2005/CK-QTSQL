@@ -5,69 +5,69 @@ export declare class LocationsService {
     constructor(prisma: PrismaService);
     findAll(warehouseId?: number): Promise<({
         warehouse: {
-            id: number;
             warehouseName: string;
+            id: number;
         } | null;
     } & {
-        id: number;
-        status: number;
-        createdAt: Date;
         description: string | null;
-        updatedAt: Date;
+        status: number;
+        warehouseId: number | null;
         locationCode: string;
         capacity: number;
-        warehouseId: number | null;
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     findOne(id: number): Promise<{
         warehouse: {
-            id: number;
-            status: number;
-            createdAt: Date;
-            updatedAt: Date;
             warehouseName: string;
             address: string | null;
             phone: string | null;
             managerName: string | null;
+            status: number;
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
         } | null;
     } & {
-        id: number;
-        status: number;
-        createdAt: Date;
         description: string | null;
-        updatedAt: Date;
+        status: number;
+        warehouseId: number | null;
         locationCode: string;
         capacity: number;
-        warehouseId: number | null;
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     create(dto: CreateLocationDto): Promise<{
         warehouse: {
-            id: number;
             warehouseName: string;
+            id: number;
         } | null;
     } & {
-        id: number;
-        status: number;
-        createdAt: Date;
         description: string | null;
-        updatedAt: Date;
+        status: number;
+        warehouseId: number | null;
         locationCode: string;
         capacity: number;
-        warehouseId: number | null;
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     update(id: number, dto: UpdateLocationDto): Promise<{
         warehouse: {
-            id: number;
             warehouseName: string;
+            id: number;
         } | null;
     } & {
-        id: number;
-        status: number;
-        createdAt: Date;
         description: string | null;
-        updatedAt: Date;
+        status: number;
+        warehouseId: number | null;
         locationCode: string;
         capacity: number;
-        warehouseId: number | null;
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     remove(id: number): Promise<{
         message: string;

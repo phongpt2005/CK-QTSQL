@@ -21,7 +21,7 @@ let ProductsService = class ProductsService {
         const page = query?.page || 1;
         const limit = query?.limit || 20;
         const skip = (page - 1) * limit;
-        const where = { isDeleted: false };
+        const where = {};
         if (query?.search) {
             where.OR = [
                 { productName: { contains: query.search } },
@@ -56,7 +56,7 @@ let ProductsService = class ProductsService {
     }
     async findOne(id) {
         const product = await this.prisma.product.findFirst({
-            where: { id, isDeleted: false },
+            where: { id },
             include: {
                 category: true,
                 unit: true,
@@ -109,9 +109,8 @@ let ProductsService = class ProductsService {
     }
     async remove(id) {
         await this.findOne(id);
-        await this.prisma.product.update({
+        await this.prisma.product.delete({
             where: { id },
-            data: { isDeleted: true },
         });
         return { message: `Product #${id} deleted successfully` };
     }

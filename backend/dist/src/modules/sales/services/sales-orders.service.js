@@ -152,6 +152,27 @@ let SalesOrdersService = SalesOrdersService_1 = class SalesOrdersService {
             return so;
         });
     }
+    async remove(id) {
+        const so = await this.findOne(id);
+        if (so.status !== 'Pending') {
+            throw new common_1.BadRequestException('Only pending sales orders can be deleted');
+        }
+        return this.prisma.$transaction(async (tx) => {
+            await tx.stockReservation.deleteMany({
+                where: {
+                    referenceType: constants_1.REFERENCE_TYPE.SALES_ORDER,
+                    referenceId: id,
+                },
+            });
+            await tx.salesOrderDetail.deleteMany({
+                where: { soId: id },
+            });
+            await tx.salesOrder.delete({
+                where: { id },
+            });
+            return { message: `Sales Order #${id} has been permanently deleted` };
+        });
+    }
 };
 exports.SalesOrdersService = SalesOrdersService;
 exports.SalesOrdersService = SalesOrdersService = SalesOrdersService_1 = __decorate([

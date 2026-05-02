@@ -37,6 +37,9 @@ let PurchaseOrdersController = class PurchaseOrdersController {
     create(dto, userId) {
         return this.purchaseOrdersService.create(dto, userId);
     }
+    remove(id) {
+        return this.purchaseOrdersService.remove(id);
+    }
 };
 exports.PurchaseOrdersController = PurchaseOrdersController;
 __decorate([
@@ -69,6 +72,14 @@ __decorate([
     __metadata("design:paramtypes", [dto_1.CreatePurchaseOrderDto, Number]),
     __metadata("design:returntype", void 0)
 ], PurchaseOrdersController.prototype, "create", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Hard delete a pending purchase order' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], PurchaseOrdersController.prototype, "remove", null);
 exports.PurchaseOrdersController = PurchaseOrdersController = __decorate([
     (0, swagger_1.ApiTags)('Purchase Orders'),
     (0, swagger_1.ApiBearerAuth)(),

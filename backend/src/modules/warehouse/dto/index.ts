@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsInt, Matches } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateWarehouseDto {
@@ -16,6 +16,7 @@ export class CreateWarehouseDto {
   @ApiPropertyOptional({ example: '0901234567' })
   @IsOptional()
   @IsString()
+  @Matches(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' })
   phone?: string;
 
   @ApiPropertyOptional({ example: 'John Manager' })
@@ -38,6 +39,7 @@ export class UpdateWarehouseDto {
   @ApiPropertyOptional({ example: '0909876543' })
   @IsOptional()
   @IsString()
+  @Matches(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' })
   phone?: string;
 
   @ApiPropertyOptional({ example: 'Jane Manager' })

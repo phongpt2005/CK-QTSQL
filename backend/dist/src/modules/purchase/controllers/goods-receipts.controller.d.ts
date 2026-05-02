@@ -5,15 +5,15 @@ export declare class GoodsReceiptsController {
     constructor(goodsReceiptsService: GoodsReceiptsService);
     create(dto: CreateGoodsReceiptDto, userId: number): Promise<{
         details: ({
+            location: {
+                id: number;
+                warehouseId: number | null;
+                locationCode: string;
+            } | null;
             product: {
                 id: number;
                 productCode: string;
                 productName: string;
-            } | null;
-            location: {
-                id: number;
-                locationCode: string;
-                warehouseId: number | null;
             } | null;
         } & {
             id: number;
@@ -27,9 +27,9 @@ export declare class GoodsReceiptsController {
         status: string | null;
         createdAt: Date;
         note: string | null;
+        createdBy: number | null;
         poId: number | null;
         receiptDate: Date;
-        createdBy: number | null;
         receiptCode: string;
     }>;
 }

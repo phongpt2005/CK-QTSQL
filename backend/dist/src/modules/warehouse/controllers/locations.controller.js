@@ -18,6 +18,8 @@ const swagger_1 = require("@nestjs/swagger");
 const locations_service_1 = require("../services/locations.service");
 const dto_1 = require("../dto");
 const jwt_auth_guard_1 = require("../../../common/guards/jwt-auth.guard");
+const roles_guard_1 = require("../../../common/guards/roles.guard");
+const roles_decorator_1 = require("../../../common/decorators/roles.decorator");
 let LocationsController = class LocationsController {
     locationsService;
     constructor(locationsService) {
@@ -59,6 +61,7 @@ __decorate([
 ], LocationsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)('Admin'),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new location' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -67,6 +70,7 @@ __decorate([
 ], LocationsController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
+    (0, roles_decorator_1.Roles)('Admin'),
     (0, swagger_1.ApiOperation)({ summary: 'Update a location' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -76,6 +80,7 @@ __decorate([
 ], LocationsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, roles_decorator_1.Roles)('Admin'),
     (0, swagger_1.ApiOperation)({ summary: 'Deactivate a location' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -86,7 +91,7 @@ exports.LocationsController = LocationsController = __decorate([
     (0, swagger_1.ApiTags)('Locations'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('locations'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [locations_service_1.LocationsService])
 ], LocationsController);
 //# sourceMappingURL=locations.controller.js.map

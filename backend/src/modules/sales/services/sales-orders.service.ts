@@ -183,4 +183,33 @@ export class SalesOrdersService {
       return so;
     });
   }
+
+  async remove(id: number) {
+    const so = await this.findOne(id);
+    if (so.status !== 'Pending') {
+      throw new BadRequestException('Only pending sales orders can be deleted');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      // Hard delete stock reservations
+      await tx.stockReservation.deleteMany({
+        where: {
+          referenceType: REFERENCE_TYPE.SALES_ORDER,
+          referenceId: id,
+        },
+      });
+
+      // Hard delete details
+      await tx.salesOrderDetail.deleteMany({
+        where: { soId: id },
+      });
+
+      // Hard delete SO
+      await tx.salesOrder.delete({
+        where: { id },
+      });
+
+      return { message: `Sales Order #${id} has been permanently deleted` };
+    });
+  }
 }

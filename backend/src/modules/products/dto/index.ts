@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional, IsNumber, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsNumber, IsInt, Matches, IsEmail } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateProductDto {
@@ -131,6 +131,7 @@ export class CreateSupplierDto {
   @ApiProperty({ example: 'SUP001' })
   @IsString()
   @IsNotEmpty()
+  @Matches(/^SUP/, { message: 'Mã nhà cung cấp phải bắt đầu bằng SUP' })
   supplierCode!: string;
 
   @ApiProperty({ example: 'ACME Corp' })
@@ -141,11 +142,12 @@ export class CreateSupplierDto {
   @ApiPropertyOptional({ example: '0901234567' })
   @IsOptional()
   @IsString()
+  @Matches(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' })
   phone?: string;
 
   @ApiPropertyOptional({ example: 'acme@example.com' })
   @IsOptional()
-  @IsString()
+  @IsEmail({}, { message: 'Email không đúng định dạng' })
   email?: string;
 
   @ApiPropertyOptional({ example: '123 Main St' })
@@ -163,11 +165,12 @@ export class UpdateSupplierDto {
   @ApiPropertyOptional({ example: '0909876543' })
   @IsOptional()
   @IsString()
+  @Matches(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' })
   phone?: string;
 
   @ApiPropertyOptional({ example: 'new@example.com' })
   @IsOptional()
-  @IsString()
+  @IsEmail({}, { message: 'Email không đúng định dạng' })
   email?: string;
 
   @ApiPropertyOptional({ example: '456 New St' })
@@ -186,6 +189,7 @@ export class CreateCustomerDto {
   @ApiProperty({ example: 'CUS001' })
   @IsString()
   @IsNotEmpty()
+  @Matches(/^CUS/, { message: 'Mã khách hàng phải bắt đầu bằng CUS' })
   customerCode!: string;
 
   @ApiProperty({ example: 'John Doe' })
@@ -196,11 +200,12 @@ export class CreateCustomerDto {
   @ApiPropertyOptional({ example: '0901234567' })
   @IsOptional()
   @IsString()
+  @Matches(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' })
   phone?: string;
 
   @ApiPropertyOptional({ example: 'john@example.com' })
   @IsOptional()
-  @IsString()
+  @IsEmail({}, { message: 'Email không đúng định dạng' })
   email?: string;
 
   @ApiPropertyOptional({ example: '789 Customer Blvd' })
@@ -218,11 +223,12 @@ export class UpdateCustomerDto {
   @ApiPropertyOptional({ example: '0909876543' })
   @IsOptional()
   @IsString()
+  @Matches(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' })
   phone?: string;
 
   @ApiPropertyOptional({ example: 'jane@example.com' })
   @IsOptional()
-  @IsString()
+  @IsEmail({}, { message: 'Email không đúng định dạng' })
   email?: string;
 
   @ApiPropertyOptional({ example: '321 Updated Blvd' })

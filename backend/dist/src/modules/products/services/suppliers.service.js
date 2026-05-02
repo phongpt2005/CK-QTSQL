@@ -19,13 +19,12 @@ let SuppliersService = class SuppliersService {
     }
     async findAll() {
         return this.prisma.supplier.findMany({
-            where: { isDeleted: false },
             orderBy: { id: 'desc' },
         });
     }
     async findOne(id) {
         const supplier = await this.prisma.supplier.findFirst({
-            where: { id, isDeleted: false },
+            where: { id },
         });
         if (!supplier) {
             throw new common_1.NotFoundException(`Supplier #${id} not found`);
@@ -64,9 +63,8 @@ let SuppliersService = class SuppliersService {
     }
     async remove(id) {
         await this.findOne(id);
-        await this.prisma.supplier.update({
+        await this.prisma.supplier.delete({
             where: { id },
-            data: { isDeleted: true },
         });
         return { message: `Supplier #${id} deleted successfully` };
     }

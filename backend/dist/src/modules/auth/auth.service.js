@@ -82,6 +82,36 @@ let AuthService = class AuthService {
             },
         };
     }
+    async register(registerDto) {
+        const existingUser = await this.prisma.user.findUnique({
+            where: { username: registerDto.username },
+        });
+        if (existingUser) {
+            throw new common_1.ConflictException('Username (Email) already exists');
+        }
+        const passwordHash = await bcrypt.hash(registerDto.password, 10);
+        const user = await this.prisma.user.create({
+            data: {
+                username: registerDto.username,
+                passwordHash,
+                role: 'Staff',
+                status: 1,
+            },
+        });
+        const payload = {
+            sub: user.id,
+            username: user.username,
+            role: user.role,
+        };
+        return {
+            access_token: this.jwtService.sign(payload),
+            user: {
+                id: user.id,
+                username: user.username,
+                role: user.role,
+            },
+        };
+    }
     async validateUser(userId) {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },

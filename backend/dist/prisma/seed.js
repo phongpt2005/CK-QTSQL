@@ -35,162 +35,218 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
 const bcrypt = __importStar(require("bcryptjs"));
+const faker_1 = require("@faker-js/faker");
 const prisma = new client_1.PrismaClient();
+async function truncateTables() {
+    console.log('🧹 Truncating existing data...');
+    const tableNames = [
+        'InventoryTransactions', 'StockReservations', 'Inventory',
+        'DeliveryNoteDetails', 'DeliveryNotes', 'SalesOrderDetails', 'SalesOrders',
+        'GoodsReceiptDetails', 'GoodsReceipts', 'PurchaseOrderDetails', 'PurchaseOrders',
+        'Locations', 'Warehouses', 'Products', 'ProductCategories', 'Units',
+        'Suppliers', 'Customers', 'Users'
+    ];
+    await prisma.$executeRawUnsafe(`SET FOREIGN_KEY_CHECKS = 0;`);
+    for (const tableName of tableNames) {
+        try {
+            await prisma.$executeRawUnsafe(`TRUNCATE TABLE \`${tableName}\`;`);
+        }
+        catch (e) {
+            console.log(`Failed to truncate ${tableName}:`, e.message);
+        }
+    }
+    await prisma.$executeRawUnsafe(`SET FOREIGN_KEY_CHECKS = 1;`);
+    console.log('✅ Tables truncated.');
+}
 async function main() {
-    console.log('🌱 Starting seed...');
+    console.log('🌱 Starting MASSIVE seed...');
+    await truncateTables();
+    console.log('⏳ Seeding Users...');
     const adminPassword = await bcrypt.hash('admin123', 10);
-    const admin = await prisma.user.upsert({
-        where: { username: 'admin' },
-        update: {},
-        create: {
-            username: 'admin',
-            passwordHash: adminPassword,
-            role: 'Admin',
-            status: 1,
-        },
-    });
-    console.log(`✅ Admin user created: ${admin.username} (password: admin123)`);
     const staffPassword = await bcrypt.hash('staff123', 10);
-    const staff = await prisma.user.upsert({
-        where: { username: 'staff01' },
-        update: {},
-        create: {
-            username: 'staff01',
-            passwordHash: staffPassword,
-            role: 'Staff',
-            status: 1,
-        },
+    await prisma.user.createMany({
+        data: [
+            { username: 'admin', passwordHash: adminPassword, role: 'Admin', status: 1 },
+            { username: 'staff01', passwordHash: staffPassword, role: 'Staff', status: 1 }
+        ]
     });
-    console.log(`✅ Staff user created: ${staff.username} (password: staff123)`);
-    const cat1 = await prisma.productCategory.create({
-        data: { categoryName: 'Electronics', description: 'Electronic devices and components' },
+    const users = await prisma.user.findMany();
+    const admin = users.find(u => u.username === 'admin');
+    const staff = users.find(u => u.username === 'staff01');
+    console.log('✅ Users seeded.');
+    console.log('⏳ Seeding Categories (50)...');
+    const categoriesData = Array.from({ length: 50 }).map(() => ({
+        categoryName: faker_1.faker.commerce.department() + ' ' + faker_1.faker.string.alphanumeric(4),
+        description: faker_1.faker.commerce.productDescription(),
+        status: 1
+    }));
+    await prisma.productCategory.createMany({ data: categoriesData });
+    const categories = await prisma.productCategory.findMany();
+    console.log('⏳ Seeding Units (10)...');
+    const unitNames = ['Piece', 'Box', 'Kilogram', 'Meter', 'Liter', 'Pack', 'Roll', 'Set', 'Pair', 'Dozen'];
+    const unitsData = unitNames.map(name => ({
+        unitName: name,
+        symbol: name.substring(0, 3).toLowerCase()
+    }));
+    await prisma.unit.createMany({ data: unitsData });
+    const units = await prisma.unit.findMany();
+    console.log('⏳ Seeding Suppliers (200) and Customers (500)...');
+    const suppliersData = Array.from({ length: 200 }).map((_, i) => ({
+        supplierCode: `SUP-${String(i + 1).padStart(4, '0')}`,
+        name: faker_1.faker.company.name(),
+        phone: faker_1.faker.phone.number().substring(0, 20),
+        email: faker_1.faker.internet.email().substring(0, 100),
+        address: faker_1.faker.location.streetAddress().substring(0, 255),
+        status: 1
+    }));
+    await prisma.supplier.createMany({ data: suppliersData });
+    const suppliers = await prisma.supplier.findMany();
+    const customersData = Array.from({ length: 500 }).map((_, i) => ({
+        customerCode: `CUS-${String(i + 1).padStart(4, '0')}`,
+        name: faker_1.faker.company.name(),
+        phone: faker_1.faker.phone.number().substring(0, 20),
+        email: faker_1.faker.internet.email().substring(0, 100),
+        address: faker_1.faker.location.streetAddress().substring(0, 255),
+        status: 1
+    }));
+    await prisma.customer.createMany({ data: customersData });
+    const customers = await prisma.customer.findMany();
+    console.log('⏳ Seeding Warehouses (20) & Locations (200)...');
+    const warehousesData = Array.from({ length: 20 }).map((_, i) => ({
+        warehouseName: `WH ${faker_1.faker.location.city()}`.substring(0, 100),
+        address: faker_1.faker.location.streetAddress().substring(0, 255),
+        phone: faker_1.faker.phone.number().substring(0, 20),
+        managerName: faker_1.faker.person.fullName().substring(0, 100),
+        status: 1
+    }));
+    await prisma.warehouse.createMany({ data: warehousesData });
+    const warehouses = await prisma.warehouse.findMany();
+    const locationsData = [];
+    warehouses.forEach(wh => {
+        for (let i = 1; i <= 10; i++) {
+            locationsData.push({
+                warehouseId: wh.id,
+                locationCode: `WH${wh.id}-L${String(i).padStart(2, '0')}`,
+                description: `Zone A, Shelf ${i}`,
+                capacity: faker_1.faker.number.int({ min: 100, max: 1000 }),
+                status: 1
+            });
+        }
     });
-    const cat2 = await prisma.productCategory.create({
-        data: { categoryName: 'Office Supplies', description: 'Stationery and office equipment' },
+    await prisma.location.createMany({ data: locationsData });
+    const locations = await prisma.location.findMany();
+    console.log('⏳ Seeding Products (10,000) in batches...');
+    const BATCH_SIZE = 2000;
+    for (let i = 0; i < 10000; i += BATCH_SIZE) {
+        const productsData = Array.from({ length: BATCH_SIZE }).map((_, idx) => ({
+            productCode: `PRD-${String(i + idx + 1).padStart(6, '0')}`,
+            productName: (faker_1.faker.commerce.productName() + ' ' + faker_1.faker.string.alphanumeric(4)).substring(0, 255),
+            categoryId: faker_1.faker.helpers.arrayElement(categories).id,
+            unitId: faker_1.faker.helpers.arrayElement(units).id,
+            price: faker_1.faker.commerce.price({ min: 10000, max: 5000000, dec: 0 }),
+            description: faker_1.faker.commerce.productDescription(),
+            status: 1
+        }));
+        await prisma.product.createMany({ data: productsData });
+        console.log(`   Created ${i + BATCH_SIZE} products...`);
+    }
+    const products = await prisma.product.findMany();
+    console.log('⏳ Seeding Initial Inventory (10,000)...');
+    const inventoryData = products.map((prod) => {
+        const loc = faker_1.faker.helpers.arrayElement(locations);
+        return {
+            productId: prod.id,
+            warehouseId: loc.warehouseId,
+            locationId: loc.id,
+            quantity: faker_1.faker.number.int({ min: 10, max: 1000 })
+        };
     });
-    const cat3 = await prisma.productCategory.create({
-        data: { categoryName: 'Raw Materials', description: 'Manufacturing raw materials' },
+    for (let i = 0; i < inventoryData.length; i += BATCH_SIZE) {
+        await prisma.inventory.createMany({
+            data: inventoryData.slice(i, i + BATCH_SIZE),
+            skipDuplicates: true
+        });
+    }
+    console.log('✅ Inventory seeded.');
+    console.log('⏳ Seeding Purchase Orders (1,000)...');
+    for (let i = 0; i < 1000; i += 500) {
+        const poData = Array.from({ length: 500 }).map((_, idx) => ({
+            poCode: `PO-${String(i + idx + 1).padStart(5, '0')}`,
+            supplierId: faker_1.faker.helpers.arrayElement(suppliers).id,
+            orderDate: faker_1.faker.date.recent({ days: 30 }),
+            status: 'Completed',
+            totalAmount: 0,
+            createdBy: admin.id,
+        }));
+        await prisma.purchaseOrder.createMany({ data: poData });
+    }
+    const purchaseOrders = await prisma.purchaseOrder.findMany({ select: { id: true, poCode: true } });
+    console.log('⏳ Seeding Purchase Order Details...');
+    let poDetailsData = [];
+    purchaseOrders.forEach(po => {
+        const itemsCount = faker_1.faker.number.int({ min: 1, max: 3 });
+        for (let j = 0; j < itemsCount; j++) {
+            const p = faker_1.faker.helpers.arrayElement(products);
+            const qty = faker_1.faker.number.int({ min: 10, max: 100 });
+            poDetailsData.push({
+                poId: po.id,
+                productId: p.id,
+                quantity: qty,
+                unitPrice: p.price,
+                totalPrice: Number(p.price) * qty
+            });
+        }
     });
-    console.log('✅ Categories created');
-    const unit1 = await prisma.unit.create({ data: { unitName: 'Piece', symbol: 'pcs' } });
-    const unit2 = await prisma.unit.create({ data: { unitName: 'Kilogram', symbol: 'kg' } });
-    const unit3 = await prisma.unit.create({ data: { unitName: 'Box', symbol: 'box' } });
-    const unit4 = await prisma.unit.create({ data: { unitName: 'Meter', symbol: 'm' } });
-    console.log('✅ Units created');
-    const prod1 = await prisma.product.create({
-        data: {
-            productCode: 'ELEC-001',
-            productName: 'Laptop Dell Inspiron 15',
-            categoryId: cat1.id,
-            unitId: unit1.id,
-            price: 15000000,
-            description: 'Dell Inspiron 15 inch laptop',
-        },
+    for (let i = 0; i < poDetailsData.length; i += BATCH_SIZE) {
+        await prisma.purchaseOrderDetail.createMany({ data: poDetailsData.slice(i, i + BATCH_SIZE) });
+    }
+    console.log('⏳ Seeding Sales Orders (5,000)...');
+    for (let i = 0; i < 5000; i += BATCH_SIZE) {
+        const soData = Array.from({ length: Math.min(BATCH_SIZE, 5000 - i) }).map((_, idx) => ({
+            soCode: `SO-${String(i + idx + 1).padStart(5, '0')}`,
+            customerId: faker_1.faker.helpers.arrayElement(customers).id,
+            orderDate: faker_1.faker.date.recent({ days: 30 }),
+            status: 'Completed',
+            totalAmount: 0,
+            createdBy: admin.id,
+        }));
+        await prisma.salesOrder.createMany({ data: soData });
+        console.log(`   Created ${i + Math.min(BATCH_SIZE, 5000 - i)} SOs...`);
+    }
+    console.log('⏳ Seeding Sales Order Details...');
+    const salesOrders = await prisma.salesOrder.findMany({ select: { id: true } });
+    let soDetailsData = [];
+    salesOrders.forEach(so => {
+        const itemsCount = faker_1.faker.number.int({ min: 1, max: 3 });
+        for (let j = 0; j < itemsCount; j++) {
+            const p = faker_1.faker.helpers.arrayElement(products);
+            const qty = faker_1.faker.number.int({ min: 1, max: 20 });
+            soDetailsData.push({
+                soId: so.id,
+                productId: p.id,
+                quantity: qty,
+                unitPrice: p.price,
+                totalPrice: Number(p.price) * qty
+            });
+        }
     });
-    const prod2 = await prisma.product.create({
-        data: {
-            productCode: 'ELEC-002',
-            productName: 'Wireless Mouse Logitech',
-            categoryId: cat1.id,
-            unitId: unit1.id,
-            price: 350000,
-            description: 'Logitech wireless mouse',
-        },
-    });
-    const prod3 = await prisma.product.create({
-        data: {
-            productCode: 'OFF-001',
-            productName: 'A4 Paper (500 sheets)',
-            categoryId: cat2.id,
-            unitId: unit3.id,
-            price: 85000,
-            description: 'Standard A4 paper pack',
-        },
-    });
-    const prod4 = await prisma.product.create({
-        data: {
-            productCode: 'RAW-001',
-            productName: 'Steel Wire 2mm',
-            categoryId: cat3.id,
-            unitId: unit4.id,
-            price: 25000,
-            description: 'Steel wire 2mm diameter',
-        },
-    });
-    console.log('✅ Products created');
-    const wh1 = await prisma.warehouse.create({
-        data: {
-            warehouseName: 'Main Warehouse',
-            address: '123 Industrial Zone, District 9, HCMC',
-            phone: '028-1234-5678',
-            managerName: 'Nguyen Van A',
-        },
-    });
-    const wh2 = await prisma.warehouse.create({
-        data: {
-            warehouseName: 'Secondary Warehouse',
-            address: '456 Storage Area, Thu Duc, HCMC',
-            phone: '028-8765-4321',
-            managerName: 'Tran Thi B',
-        },
-    });
-    const loc1 = await prisma.location.create({
-        data: { warehouseId: wh1.id, locationCode: 'A-01-01', description: 'Zone A, Shelf 1, Slot 1', capacity: 500 },
-    });
-    const loc2 = await prisma.location.create({
-        data: { warehouseId: wh1.id, locationCode: 'A-01-02', description: 'Zone A, Shelf 1, Slot 2', capacity: 500 },
-    });
-    const loc3 = await prisma.location.create({
-        data: { warehouseId: wh1.id, locationCode: 'B-01-01', description: 'Zone B, Shelf 1, Slot 1', capacity: 1000 },
-    });
-    const loc4 = await prisma.location.create({
-        data: { warehouseId: wh2.id, locationCode: 'C-01-01', description: 'Zone C, Shelf 1, Slot 1', capacity: 800 },
-    });
-    console.log('✅ Warehouses & Locations created');
-    await prisma.supplier.create({
-        data: {
-            supplierCode: 'SUP-001',
-            name: 'Dell Vietnam',
-            phone: '028-1111-2222',
-            email: 'sales@dell.vn',
-            address: '789 Tech Park, District 7, HCMC',
-        },
-    });
-    await prisma.supplier.create({
-        data: {
-            supplierCode: 'SUP-002',
-            name: 'Office Mart Co.',
-            phone: '028-3333-4444',
-            email: 'contact@officemart.vn',
-            address: '321 Commerce St, District 1, HCMC',
-        },
-    });
-    console.log('✅ Suppliers created');
-    await prisma.customer.create({
-        data: {
-            customerCode: 'CUS-001',
-            name: 'ABC Corporation',
-            phone: '028-5555-6666',
-            email: 'procurement@abc-corp.vn',
-            address: '100 Business Ave, District 2, HCMC',
-        },
-    });
-    await prisma.customer.create({
-        data: {
-            customerCode: 'CUS-002',
-            name: 'XYZ Trading Ltd.',
-            phone: '028-7777-8888',
-            email: 'orders@xyz-trading.vn',
-            address: '200 Trade Center, Binh Thanh, HCMC',
-        },
-    });
-    console.log('✅ Customers created');
-    console.log('\n🎉 Seed completed successfully!');
-    console.log('──────────────────────────────────────');
-    console.log('Default login credentials:');
-    console.log('  Admin: admin / admin123');
-    console.log('  Staff: staff01 / staff123');
-    console.log('──────────────────────────────────────');
+    for (let i = 0; i < soDetailsData.length; i += BATCH_SIZE) {
+        await prisma.salesOrderDetail.createMany({ data: soDetailsData.slice(i, i + BATCH_SIZE) });
+    }
+    console.log('⏳ Seeding Inventory Transactions (~20,000)...');
+    const txData = Array.from({ length: 20000 }).map(() => ({
+        productId: faker_1.faker.helpers.arrayElement(products).id,
+        warehouseId: faker_1.faker.helpers.arrayElement(warehouses).id,
+        quantity: faker_1.faker.number.int({ min: 1, max: 50 }),
+        transactionType: faker_1.faker.helpers.arrayElement(['IN', 'OUT']),
+        referenceType: faker_1.faker.helpers.arrayElement(['PurchaseOrder', 'SalesOrder', 'Adjustment']),
+        transactionDate: faker_1.faker.date.recent({ days: 60 }),
+        note: 'System generated transaction'
+    }));
+    for (let i = 0; i < txData.length; i += BATCH_SIZE) {
+        await prisma.inventoryTransaction.createMany({ data: txData.slice(i, i + BATCH_SIZE) });
+    }
+    console.log('✅ ALL MASSIVE DATA SEEDED SUCCESSFULLY!');
 }
 main()
     .catch((e) => {

@@ -67,6 +67,7 @@ All endpoints (except login) require Bearer JWT token.
     .addTag('Goods Receipts', 'Goods receipt (inbound)')
     .addTag('Sales Orders', 'Sales order management')
     .addTag('Delivery Notes', 'Delivery note (outbound)')
+    .addTag('Admin - Architecture', 'Database architecture diagnostics (Partitioning, Replication)')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

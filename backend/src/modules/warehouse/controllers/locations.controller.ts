@@ -6,11 +6,13 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { LocationsService } from '../services/locations.service';
 import { CreateLocationDto, UpdateLocationDto } from '../dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
 
 @ApiTags('Locations')
 @ApiBearerAuth()
 @Controller('locations')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class LocationsController {
   constructor(private locationsService: LocationsService) {}
 
@@ -30,18 +32,21 @@ export class LocationsController {
   }
 
   @Post()
+  @Roles('Admin')
   @ApiOperation({ summary: 'Create a new location' })
   create(@Body() dto: CreateLocationDto) {
     return this.locationsService.create(dto);
   }
 
   @Put(':id')
+  @Roles('Admin')
   @ApiOperation({ summary: 'Update a location' })
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateLocationDto) {
     return this.locationsService.update(id, dto);
   }
 
   @Delete(':id')
+  @Roles('Admin')
   @ApiOperation({ summary: 'Deactivate a location' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.locationsService.remove(id);

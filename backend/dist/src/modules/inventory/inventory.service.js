@@ -32,7 +32,7 @@ let InventoryService = InventoryService_1 = class InventoryService {
         if (query.locationId)
             where.locationId = query.locationId;
         const [data, total] = await Promise.all([
-            this.prisma.inventory.findMany({
+            this.prisma.reader.inventory.findMany({
                 where,
                 include: {
                     product: { select: { id: true, productCode: true, productName: true } },
@@ -43,7 +43,7 @@ let InventoryService = InventoryService_1 = class InventoryService {
                 take: limit,
                 orderBy: { lastUpdated: 'desc' },
             }),
-            this.prisma.inventory.count({ where }),
+            this.prisma.reader.inventory.count({ where }),
         ]);
         return {
             data,
@@ -51,7 +51,7 @@ let InventoryService = InventoryService_1 = class InventoryService {
         };
     }
     async findByProduct(productId) {
-        const inventories = await this.prisma.inventory.findMany({
+        const inventories = await this.prisma.reader.inventory.findMany({
             where: { productId },
             include: {
                 product: { select: { id: true, productCode: true, productName: true } },
@@ -59,7 +59,7 @@ let InventoryService = InventoryService_1 = class InventoryService {
                 location: { select: { id: true, locationCode: true } },
             },
         });
-        const reservations = await this.prisma.stockReservation.groupBy({
+        const reservations = await this.prisma.reader.stockReservation.groupBy({
             by: ['productId', 'warehouseId', 'locationId'],
             where: {
                 productId,
@@ -102,7 +102,7 @@ let InventoryService = InventoryService_1 = class InventoryService {
         if (query.warehouseId)
             where.warehouseId = query.warehouseId;
         const [data, total] = await Promise.all([
-            this.prisma.inventoryTransaction.findMany({
+            this.prisma.reader.inventoryTransaction.findMany({
                 where,
                 include: {
                     product: { select: { id: true, productCode: true, productName: true } },
@@ -112,7 +112,7 @@ let InventoryService = InventoryService_1 = class InventoryService {
                 take: limit,
                 orderBy: { transactionDate: 'desc' },
             }),
-            this.prisma.inventoryTransaction.count({ where }),
+            this.prisma.reader.inventoryTransaction.count({ where }),
         ]);
         return {
             data,

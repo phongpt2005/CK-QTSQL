@@ -19,13 +19,12 @@ let CustomersService = class CustomersService {
     }
     async findAll() {
         return this.prisma.customer.findMany({
-            where: { isDeleted: false },
             orderBy: { id: 'desc' },
         });
     }
     async findOne(id) {
         const customer = await this.prisma.customer.findFirst({
-            where: { id, isDeleted: false },
+            where: { id },
         });
         if (!customer) {
             throw new common_1.NotFoundException(`Customer #${id} not found`);
@@ -64,9 +63,8 @@ let CustomersService = class CustomersService {
     }
     async remove(id) {
         await this.findOne(id);
-        await this.prisma.customer.update({
+        await this.prisma.customer.delete({
             where: { id },
-            data: { isDeleted: true },
         });
         return { message: `Customer #${id} deleted successfully` };
     }

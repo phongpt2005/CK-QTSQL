@@ -4,48 +4,48 @@ export declare class CustomersController {
     private customersService;
     constructor(customersService: CustomersService);
     findAll(): Promise<{
-        id: number;
         status: number;
-        createdAt: Date;
         name: string;
-        isDeleted: boolean;
-        address: string | null;
         phone: string | null;
         email: string | null;
+        address: string | null;
         customerCode: string;
+        id: number;
+        createdAt: Date;
+        isDeleted: boolean;
     }[]>;
     findOne(id: number): Promise<{
-        id: number;
         status: number;
-        createdAt: Date;
         name: string;
-        isDeleted: boolean;
-        address: string | null;
         phone: string | null;
         email: string | null;
+        address: string | null;
         customerCode: string;
+        id: number;
+        createdAt: Date;
+        isDeleted: boolean;
     }>;
     create(dto: CreateCustomerDto): Promise<{
-        id: number;
         status: number;
-        createdAt: Date;
         name: string;
-        isDeleted: boolean;
-        address: string | null;
         phone: string | null;
         email: string | null;
+        address: string | null;
         customerCode: string;
+        id: number;
+        createdAt: Date;
+        isDeleted: boolean;
     }>;
     update(id: number, dto: UpdateCustomerDto): Promise<{
-        id: number;
         status: number;
-        createdAt: Date;
         name: string;
-        isDeleted: boolean;
-        address: string | null;
         phone: string | null;
         email: string | null;
+        address: string | null;
         customerCode: string;
+        id: number;
+        createdAt: Date;
+        isDeleted: boolean;
     }>;
     remove(id: number): Promise<{
         message: string;

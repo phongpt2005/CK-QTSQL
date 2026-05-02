@@ -5,27 +5,27 @@ export declare class ProductsController {
     constructor(productsService: ProductsService);
     findAll(search?: string, categoryId?: string, page?: string, limit?: string): Promise<{
         data: ({
+            category: {
+                categoryName: string;
+                id: number;
+            } | null;
             unit: {
                 symbol: string | null;
-                id: number;
                 unitName: string;
-            } | null;
-            category: {
                 id: number;
-                categoryName: string;
             } | null;
         } & {
-            id: number;
-            status: number;
-            createdAt: Date;
             description: string | null;
-            updatedAt: Date;
-            isDeleted: boolean;
             productCode: string;
             productName: string;
-            price: import("@prisma/client/runtime/library").Decimal;
             categoryId: number | null;
             unitId: number | null;
+            price: import("@prisma/client/runtime/library").Decimal;
+            status: number;
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            isDeleted: boolean;
         })[];
         meta: {
             total: number;
@@ -35,88 +35,88 @@ export declare class ProductsController {
         };
     }>;
     findOne(id: number): Promise<{
-        unit: {
-            symbol: string | null;
-            id: number;
-            unitName: string;
-        } | null;
         category: {
-            id: number;
-            status: number;
-            createdAt: Date;
-            categoryName: string;
             description: string | null;
+            status: number;
+            categoryName: string;
+            id: number;
+            createdAt: Date;
             updatedAt: Date;
             isDeleted: boolean;
         } | null;
+        unit: {
+            symbol: string | null;
+            unitName: string;
+            id: number;
+        } | null;
     } & {
-        id: number;
-        status: number;
-        createdAt: Date;
         description: string | null;
-        updatedAt: Date;
-        isDeleted: boolean;
         productCode: string;
         productName: string;
-        price: import("@prisma/client/runtime/library").Decimal;
         categoryId: number | null;
         unitId: number | null;
+        price: import("@prisma/client/runtime/library").Decimal;
+        status: number;
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
     }>;
     create(dto: CreateProductDto): Promise<{
-        unit: {
-            symbol: string | null;
-            id: number;
-            unitName: string;
-        } | null;
         category: {
-            id: number;
-            status: number;
-            createdAt: Date;
-            categoryName: string;
             description: string | null;
+            status: number;
+            categoryName: string;
+            id: number;
+            createdAt: Date;
             updatedAt: Date;
             isDeleted: boolean;
         } | null;
+        unit: {
+            symbol: string | null;
+            unitName: string;
+            id: number;
+        } | null;
     } & {
-        id: number;
-        status: number;
-        createdAt: Date;
         description: string | null;
-        updatedAt: Date;
-        isDeleted: boolean;
         productCode: string;
         productName: string;
-        price: import("@prisma/client/runtime/library").Decimal;
         categoryId: number | null;
         unitId: number | null;
+        price: import("@prisma/client/runtime/library").Decimal;
+        status: number;
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
     }>;
     update(id: number, dto: UpdateProductDto): Promise<{
-        unit: {
-            symbol: string | null;
-            id: number;
-            unitName: string;
-        } | null;
         category: {
-            id: number;
-            status: number;
-            createdAt: Date;
-            categoryName: string;
             description: string | null;
+            status: number;
+            categoryName: string;
+            id: number;
+            createdAt: Date;
             updatedAt: Date;
             isDeleted: boolean;
         } | null;
+        unit: {
+            symbol: string | null;
+            unitName: string;
+            id: number;
+        } | null;
     } & {
-        id: number;
-        status: number;
-        createdAt: Date;
         description: string | null;
-        updatedAt: Date;
-        isDeleted: boolean;
         productCode: string;
         productName: string;
-        price: import("@prisma/client/runtime/library").Decimal;
         categoryId: number | null;
         unitId: number | null;
+        price: import("@prisma/client/runtime/library").Decimal;
+        status: number;
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+        isDeleted: boolean;
     }>;
     remove(id: number): Promise<{
         message: string;

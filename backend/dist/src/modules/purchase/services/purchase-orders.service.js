@@ -125,6 +125,21 @@ let PurchaseOrdersService = class PurchaseOrdersService {
             return po;
         });
     }
+    async remove(id) {
+        const po = await this.findOne(id);
+        if (po.status !== 'Pending') {
+            throw new common_1.BadRequestException('Only pending purchase orders can be deleted');
+        }
+        return this.prisma.$transaction(async (tx) => {
+            await tx.purchaseOrderDetail.deleteMany({
+                where: { poId: id },
+            });
+            await tx.purchaseOrder.delete({
+                where: { id },
+            });
+            return { message: `Purchase Order #${id} has been permanently deleted` };
+        });
+    }
 };
 exports.PurchaseOrdersService = PurchaseOrdersService;
 exports.PurchaseOrdersService = PurchaseOrdersService = __decorate([

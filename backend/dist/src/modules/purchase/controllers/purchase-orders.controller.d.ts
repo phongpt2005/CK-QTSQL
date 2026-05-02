@@ -5,14 +5,14 @@ export declare class PurchaseOrdersController {
     constructor(purchaseOrdersService: PurchaseOrdersService);
     findAll(page?: string, limit?: string, status?: string): Promise<{
         data: ({
+            _count: {
+                goodsReceipts: number;
+            };
             supplier: {
                 id: number;
                 name: string;
                 supplierCode: string;
             } | null;
-            _count: {
-                goodsReceipts: number;
-            };
             createdByUser: {
                 id: number;
                 username: string;
@@ -36,11 +36,11 @@ export declare class PurchaseOrdersController {
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            note: string | null;
+            poCode: string;
             supplierId: number | null;
             orderDate: Date;
-            poCode: string;
             totalAmount: import("@prisma/client/runtime/library").Decimal;
+            note: string | null;
             createdBy: number | null;
         })[];
         meta: {
@@ -53,14 +53,14 @@ export declare class PurchaseOrdersController {
     findOne(id: number): Promise<{
         goodsReceipts: ({
             details: ({
+                location: {
+                    id: number;
+                    locationCode: string;
+                } | null;
                 product: {
                     id: number;
                     productCode: string;
                     productName: string;
-                } | null;
-                location: {
-                    id: number;
-                    locationCode: string;
                 } | null;
             } & {
                 id: number;
@@ -74,9 +74,9 @@ export declare class PurchaseOrdersController {
             status: string | null;
             createdAt: Date;
             note: string | null;
+            createdBy: number | null;
             poId: number | null;
             receiptDate: Date;
-            createdBy: number | null;
             receiptCode: string;
         })[];
         supplier: {
@@ -85,10 +85,10 @@ export declare class PurchaseOrdersController {
             createdAt: Date;
             name: string;
             isDeleted: boolean;
-            address: string | null;
-            phone: string | null;
             supplierCode: string;
+            phone: string | null;
             email: string | null;
+            address: string | null;
         } | null;
         createdByUser: {
             id: number;
@@ -113,11 +113,11 @@ export declare class PurchaseOrdersController {
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        note: string | null;
+        poCode: string;
         supplierId: number | null;
         orderDate: Date;
-        poCode: string;
         totalAmount: import("@prisma/client/runtime/library").Decimal;
+        note: string | null;
         createdBy: number | null;
     }>;
     create(dto: CreatePurchaseOrderDto, userId: number): Promise<{
@@ -145,11 +145,14 @@ export declare class PurchaseOrdersController {
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        note: string | null;
+        poCode: string;
         supplierId: number | null;
         orderDate: Date;
-        poCode: string;
         totalAmount: import("@prisma/client/runtime/library").Decimal;
+        note: string | null;
         createdBy: number | null;
+    }>;
+    remove(id: number): Promise<{
+        message: string;
     }>;
 }

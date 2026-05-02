@@ -8,15 +8,15 @@ export declare class DeliveryNotesService {
     constructor(prisma: PrismaService, inventoryService: InventoryService);
     create(dto: CreateDeliveryNoteDto, userId: number): Promise<{
         details: ({
+            location: {
+                id: number;
+                warehouseId: number | null;
+                locationCode: string;
+            } | null;
             product: {
                 id: number;
                 productCode: string;
                 productName: string;
-            } | null;
-            location: {
-                id: number;
-                locationCode: string;
-                warehouseId: number | null;
             } | null;
         } & {
             id: number;

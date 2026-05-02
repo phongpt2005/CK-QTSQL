@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -123,9 +124,9 @@ model Location {
   @@map("Locations")
 }
 
-// ======================================================
+
 // 3. ĐỐI TÁC
-// ======================================================
+
 model Supplier {
   id           Int       @id @default(autoincrement())
   supplierCode String    @unique @map("SupplierCode") @db.VarChar(50)
@@ -351,4 +352,61 @@ model StockReservation {
   location  Location?  @relation(fields: [locationId], references: [id])
 
   @@map("StockReservations")
+}
+
+// ======================================================
+// 8. DATABASE VIEWS (Custom RAW SQL)
+// ======================================================
+/// Báo cáo tồn kho chi tiết
+view InventoryReportView {
+  id            Int      @id
+  productId     Int      @map("ProductID")
+  productCode   String   @map("ProductCode")
+  productName   String   @map("ProductName")
+  warehouseName String   @map("WarehouseName")
+  locationCode  String   @map("LocationCode")
+  quantity      Int      @map("Quantity")
+
+  @@map("InventoryReportView")
+}
+
+/// Báo cáo tổng hợp đơn mua hàng
+view PurchaseOrderSummaryView {
+  id           Int      @id
+  poCode       String   @map("POCode")
+  supplierName String?  @map("SupplierName")
+  orderDate    DateTime @map("OrderDate")
+  status       String   @map("Status")
+  totalAmount  Decimal  @map("TotalAmount")
+  totalItems   Int      @map("TotalItems")
+
+  @@map("PurchaseOrderSummaryView")
+}
+
+/// Báo cáo tổng hợp đơn bán hàng
+view SalesOrderSummaryView {
+  id           Int      @id
+  soCode       String   @map("SOCode")
+  customerName String?  @map("CustomerName")
+  orderDate    DateTime @map("OrderDate")
+  status       String   @map("Status")
+  totalAmount  Decimal  @map("TotalAmount")
+  totalItems   Int      @map("TotalItems")
+
+  @@map("SalesOrderSummaryView")
+}
+
+/// Thẻ kho / Nhật ký giao dịch
+view TransactionHistoryView {
+  id              Int      @id
+  transactionDate DateTime @map("TransactionDate")
+  transactionType String?  @map("TransactionType")
+  productCode     String   @map("ProductCode")
+  productName     String   @map("ProductName")
+  warehouseName   String?  @map("WarehouseName")
+  quantity        Int      @map("Quantity")
+  referenceType   String?  @map("ReferenceType")
+  referenceId     Int?     @map("ReferenceID")
+
+  @@map("TransactionHistoryView")
 }

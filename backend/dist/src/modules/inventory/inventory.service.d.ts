@@ -7,11 +7,6 @@ export declare class InventoryService {
     constructor(prisma: PrismaService);
     findAll(query: QueryInventoryDto): Promise<{
         data: ({
-            product: {
-                id: number;
-                productCode: string;
-                productName: string;
-            } | null;
             warehouse: {
                 id: number;
                 warehouseName: string;
@@ -19,6 +14,11 @@ export declare class InventoryService {
             location: {
                 id: number;
                 locationCode: string;
+            } | null;
+            product: {
+                id: number;
+                productCode: string;
+                productName: string;
             } | null;
         } & {
             id: number;
@@ -43,11 +43,6 @@ export declare class InventoryService {
         details: {
             reservedQty: number;
             availableQty: number;
-            product: {
-                id: number;
-                productCode: string;
-                productName: string;
-            } | null;
             warehouse: {
                 id: number;
                 warehouseName: string;
@@ -55,6 +50,11 @@ export declare class InventoryService {
             location: {
                 id: number;
                 locationCode: string;
+            } | null;
+            product: {
+                id: number;
+                productCode: string;
+                productName: string;
             } | null;
             id: number;
             warehouseId: number | null;
@@ -71,25 +71,25 @@ export declare class InventoryService {
         limit?: number;
     }): Promise<{
         data: ({
+            warehouse: {
+                id: number;
+                warehouseName: string;
+            } | null;
             product: {
                 id: number;
                 productCode: string;
                 productName: string;
             } | null;
-            warehouse: {
-                id: number;
-                warehouseName: string;
-            } | null;
         } & {
             id: number;
             warehouseId: number | null;
+            note: string | null;
             productId: number | null;
             quantity: number;
             referenceType: string | null;
             referenceId: number | null;
             transactionType: string | null;
             transactionDate: Date;
-            note: string | null;
         })[];
         meta: {
             total: number;

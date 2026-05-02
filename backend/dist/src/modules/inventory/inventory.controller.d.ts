@@ -4,11 +4,6 @@ export declare class InventoryController {
     constructor(inventoryService: InventoryService);
     findAll(warehouseId?: string, productId?: string, locationId?: string, page?: string, limit?: string): Promise<{
         data: ({
-            product: {
-                id: number;
-                productCode: string;
-                productName: string;
-            } | null;
             warehouse: {
                 id: number;
                 warehouseName: string;
@@ -16,6 +11,11 @@ export declare class InventoryController {
             location: {
                 id: number;
                 locationCode: string;
+            } | null;
+            product: {
+                id: number;
+                productCode: string;
+                productName: string;
             } | null;
         } & {
             id: number;
@@ -34,25 +34,25 @@ export declare class InventoryController {
     }>;
     getTransactions(productId?: string, warehouseId?: string, page?: string, limit?: string): Promise<{
         data: ({
+            warehouse: {
+                id: number;
+                warehouseName: string;
+            } | null;
             product: {
                 id: number;
                 productCode: string;
                 productName: string;
             } | null;
-            warehouse: {
-                id: number;
-                warehouseName: string;
-            } | null;
         } & {
             id: number;
             warehouseId: number | null;
+            note: string | null;
             productId: number | null;
             quantity: number;
             referenceType: string | null;
             referenceId: number | null;
             transactionType: string | null;
             transactionDate: Date;
-            note: string | null;
         })[];
         meta: {
             total: number;
@@ -69,11 +69,6 @@ export declare class InventoryController {
         details: {
             reservedQty: number;
             availableQty: number;
-            product: {
-                id: number;
-                productCode: string;
-                productName: string;
-            } | null;
             warehouse: {
                 id: number;
                 warehouseName: string;
@@ -81,6 +76,11 @@ export declare class InventoryController {
             location: {
                 id: number;
                 locationCode: string;
+            } | null;
+            product: {
+                id: number;
+                productCode: string;
+                productName: string;
             } | null;
             id: number;
             warehouseId: number | null;

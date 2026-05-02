@@ -6,11 +6,13 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { SuppliersService } from '../services/suppliers.service';
 import { CreateSupplierDto, UpdateSupplierDto } from '../dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
 
 @ApiTags('Suppliers')
 @ApiBearerAuth()
 @Controller('suppliers')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class SuppliersController {
   constructor(private suppliersService: SuppliersService) {}
 
@@ -27,19 +29,22 @@ export class SuppliersController {
   }
 
   @Post()
+  @Roles('Admin')
   @ApiOperation({ summary: 'Create a new supplier' })
   create(@Body() dto: CreateSupplierDto) {
     return this.suppliersService.create(dto);
   }
 
   @Put(':id')
+  @Roles('Admin')
   @ApiOperation({ summary: 'Update a supplier' })
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateSupplierDto) {
     return this.suppliersService.update(id, dto);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Soft delete a supplier' })
+  @Roles('Admin')
+  @ApiOperation({ summary: 'Hard delete a supplier' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.suppliersService.remove(id);
   }

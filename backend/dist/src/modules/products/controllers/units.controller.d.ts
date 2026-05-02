@@ -5,23 +5,23 @@ export declare class UnitsController {
     constructor(unitsService: UnitsService);
     findAll(): Promise<{
         symbol: string | null;
-        id: number;
         unitName: string;
+        id: number;
     }[]>;
     findOne(id: number): Promise<{
         symbol: string | null;
-        id: number;
         unitName: string;
+        id: number;
     }>;
     create(dto: CreateUnitDto): Promise<{
         symbol: string | null;
-        id: number;
         unitName: string;
+        id: number;
     }>;
     update(id: number, dto: UpdateUnitDto): Promise<{
         symbol: string | null;
-        id: number;
         unitName: string;
+        id: number;
     }>;
     remove(id: number): Promise<{
         message: string;

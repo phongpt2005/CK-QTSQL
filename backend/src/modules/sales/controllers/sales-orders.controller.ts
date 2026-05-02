@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Body, Param, Query,
+  Controller, Get, Post, Delete, Body, Param, Query,
   ParseIntPipe, UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
@@ -45,5 +45,11 @@ export class SalesOrdersController {
     @CurrentUser('id') userId: number,
   ) {
     return this.salesOrdersService.create(dto, userId);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Hard delete a pending sales order' })
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.salesOrdersService.remove(id);
   }
 }

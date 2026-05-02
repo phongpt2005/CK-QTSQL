@@ -37,6 +37,9 @@ let SalesOrdersController = class SalesOrdersController {
     create(dto, userId) {
         return this.salesOrdersService.create(dto, userId);
     }
+    remove(id) {
+        return this.salesOrdersService.remove(id);
+    }
 };
 exports.SalesOrdersController = SalesOrdersController;
 __decorate([
@@ -69,6 +72,14 @@ __decorate([
     __metadata("design:paramtypes", [dto_1.CreateSalesOrderDto, Number]),
     __metadata("design:returntype", void 0)
 ], SalesOrdersController.prototype, "create", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Hard delete a pending sales order' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], SalesOrdersController.prototype, "remove", null);
 exports.SalesOrdersController = SalesOrdersController = __decorate([
     (0, swagger_1.ApiTags)('Sales Orders'),
     (0, swagger_1.ApiBearerAuth)(),

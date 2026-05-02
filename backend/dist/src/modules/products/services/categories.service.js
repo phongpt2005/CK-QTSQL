@@ -19,13 +19,12 @@ let CategoriesService = class CategoriesService {
     }
     async findAll() {
         return this.prisma.productCategory.findMany({
-            where: { isDeleted: false },
             orderBy: { id: 'desc' },
         });
     }
     async findOne(id) {
         const category = await this.prisma.productCategory.findFirst({
-            where: { id, isDeleted: false },
+            where: { id },
             include: { products: { where: { isDeleted: false }, select: { id: true, productCode: true, productName: true } } },
         });
         if (!category) {
@@ -54,9 +53,8 @@ let CategoriesService = class CategoriesService {
     }
     async remove(id) {
         await this.findOne(id);
-        await this.prisma.productCategory.update({
+        await this.prisma.productCategory.delete({
             where: { id },
-            data: { isDeleted: true },
         });
         return { message: `Category #${id} deleted successfully` };
     }

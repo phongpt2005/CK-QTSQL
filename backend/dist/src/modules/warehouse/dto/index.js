@@ -36,6 +36,7 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '0901234567' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' }),
     __metadata("design:type", String)
 ], CreateWarehouseDto.prototype, "phone", void 0);
 __decorate([
@@ -68,6 +69,7 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '0909876543' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^0\d{9}$/, { message: 'SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số' }),
     __metadata("design:type", String)
 ], UpdateWarehouseDto.prototype, "phone", void 0);
 __decorate([

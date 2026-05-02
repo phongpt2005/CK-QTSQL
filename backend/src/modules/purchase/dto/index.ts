@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional, IsInt, IsNumber, IsArray, ValidateNested, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsInt, IsNumber, IsArray, ValidateNested, IsDateString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class PurchaseOrderItemDto {
@@ -10,6 +10,7 @@ export class PurchaseOrderItemDto {
 
   @ApiProperty({ example: 100 })
   @IsInt()
+  @Min(1)
   @Type(() => Number)
   quantity!: number;
 
@@ -54,6 +55,7 @@ export class GoodsReceiptItemDto {
 
   @ApiProperty({ example: 50, description: 'Quantity received' })
   @IsInt()
+  @Min(1)
   @Type(() => Number)
   quantity!: number;
 }

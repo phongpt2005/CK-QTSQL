@@ -12,14 +12,14 @@ export declare class SalesOrdersService {
         status?: string;
     }): Promise<{
         data: ({
+            _count: {
+                deliveryNotes: number;
+            };
             customer: {
                 id: number;
                 name: string;
                 customerCode: string;
             } | null;
-            _count: {
-                deliveryNotes: number;
-            };
             createdByUser: {
                 id: number;
                 username: string;
@@ -42,12 +42,12 @@ export declare class SalesOrdersService {
             id: number;
             status: string;
             createdAt: Date;
-            note: string | null;
             orderDate: Date;
             totalAmount: import("@prisma/client/runtime/library").Decimal;
+            note: string | null;
             createdBy: number | null;
-            customerId: number | null;
             soCode: string;
+            customerId: number | null;
         })[];
         meta: {
             total: number;
@@ -59,14 +59,14 @@ export declare class SalesOrdersService {
     findOne(id: number): Promise<{
         deliveryNotes: ({
             details: ({
+                location: {
+                    id: number;
+                    locationCode: string;
+                } | null;
                 product: {
                     id: number;
                     productCode: string;
                     productName: string;
-                } | null;
-                location: {
-                    id: number;
-                    locationCode: string;
                 } | null;
             } & {
                 id: number;
@@ -91,9 +91,9 @@ export declare class SalesOrdersService {
             createdAt: Date;
             name: string;
             isDeleted: boolean;
-            address: string | null;
             phone: string | null;
             email: string | null;
+            address: string | null;
             customerCode: string;
         } | null;
         createdByUser: {
@@ -118,12 +118,12 @@ export declare class SalesOrdersService {
         id: number;
         status: string;
         createdAt: Date;
-        note: string | null;
         orderDate: Date;
         totalAmount: import("@prisma/client/runtime/library").Decimal;
+        note: string | null;
         createdBy: number | null;
-        customerId: number | null;
         soCode: string;
+        customerId: number | null;
     }>;
     create(dto: CreateSalesOrderDto, userId: number): Promise<{
         customer: {
@@ -149,11 +149,14 @@ export declare class SalesOrdersService {
         id: number;
         status: string;
         createdAt: Date;
-        note: string | null;
         orderDate: Date;
         totalAmount: import("@prisma/client/runtime/library").Decimal;
+        note: string | null;
         createdBy: number | null;
-        customerId: number | null;
         soCode: string;
+        customerId: number | null;
+    }>;
+    remove(id: number): Promise<{
+        message: string;
     }>;
 }

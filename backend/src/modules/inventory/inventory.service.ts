@@ -6,9 +6,13 @@ import { QueryInventoryDto } from './dto';
 
 /**
  * ⭐ CORE SERVICE - The ONLY service allowed to modify Inventory table.
- * 
+ *
  * All stock changes (increase/decrease) MUST go through this service.
  * No other module should directly write to the Inventory table.
+ *
+ * Read/Write Splitting:
+ *   READ  queries → this.prisma.reader  (hits replica if configured)
+ *   WRITE queries → this.prisma          (always hits master)
  */
 @Injectable()
 export class InventoryService {
@@ -17,7 +21,7 @@ export class InventoryService {
   constructor(private prisma: PrismaService) {}
 
   // ========================================
-  // QUERY METHODS
+  // QUERY METHODS (READ → REPLICA)
   // ========================================
 
   async findAll(query: QueryInventoryDto) {
@@ -30,8 +34,9 @@ export class InventoryService {
     if (query.productId) where.productId = query.productId;
     if (query.locationId) where.locationId = query.locationId;
 
+    // ► READ operations routed to replica via this.prisma.reader
     const [data, total] = await Promise.all([
-      this.prisma.inventory.findMany({
+      this.prisma.reader.inventory.findMany({
         where,
         include: {
           product: { select: { id: true, productCode: true, productName: true } },
@@ -42,7 +47,7 @@ export class InventoryService {
         take: limit,
         orderBy: { lastUpdated: 'desc' },
       }),
-      this.prisma.inventory.count({ where }),
+      this.prisma.reader.inventory.count({ where }),
     ]);
 
     return {
@@ -52,7 +57,8 @@ export class InventoryService {
   }
 
   async findByProduct(productId: number) {
-    const inventories = await this.prisma.inventory.findMany({
+    // ► READ → replica
+    const inventories = await this.prisma.reader.inventory.findMany({
       where: { productId },
       include: {
         product: { select: { id: true, productCode: true, productName: true } },
@@ -62,7 +68,7 @@ export class InventoryService {
     });
 
     // Calculate total stock and available stock (minus reservations)
-    const reservations = await this.prisma.stockReservation.groupBy({
+    const reservations = await this.prisma.reader.stockReservation.groupBy({
       by: ['productId', 'warehouseId', 'locationId'],
       where: {
         productId,
@@ -114,8 +120,9 @@ export class InventoryService {
     if (query.productId) where.productId = query.productId;
     if (query.warehouseId) where.warehouseId = query.warehouseId;
 
+    // ► READ → replica (benefits from partitioning on TransactionDate)
     const [data, total] = await Promise.all([
-      this.prisma.inventoryTransaction.findMany({
+      this.prisma.reader.inventoryTransaction.findMany({
         where,
         include: {
           product: { select: { id: true, productCode: true, productName: true } },
@@ -125,7 +132,7 @@ export class InventoryService {
         take: limit,
         orderBy: { transactionDate: 'desc' },
       }),
-      this.prisma.inventoryTransaction.count({ where }),
+      this.prisma.reader.inventoryTransaction.count({ where }),
     ]);
 
     return {
@@ -135,13 +142,13 @@ export class InventoryService {
   }
 
   // ========================================
-  // STOCK MUTATION METHODS (CRITICAL)
+  // STOCK MUTATION METHODS (WRITE → MASTER)
   // ========================================
 
   /**
    * Increase stock for a product at a specific location.
    * Used when receiving goods (GoodsReceipt).
-   * 
+   *
    * Must be called within a Prisma interactive transaction ($transaction).
    */
   async increaseStock(
@@ -162,7 +169,7 @@ export class InventoryService {
       `increaseStock: product=${productId}, warehouse=${warehouseId}, location=${locationId}, qty=${qty}, ref=${refType}#${refId}`,
     );
 
-    // 1. SELECT FOR UPDATE to lock the inventory row
+    // 1. SELECT FOR UPDATE to lock the inventory row (WRITE → master)
     const existing = await tx.$queryRaw<any[]>`
       SELECT id, Quantity FROM Inventory 
       WHERE ProductID = ${productId} 
@@ -189,7 +196,7 @@ export class InventoryService {
       });
     }
 
-    // 3. Record the transaction
+    // 3. Record the transaction (writes to partitioned InventoryTransactions)
     await tx.inventoryTransaction.create({
       data: {
         productId,
@@ -206,7 +213,7 @@ export class InventoryService {
   /**
    * Decrease stock for a product at a specific location.
    * Used when delivering goods (DeliveryNote).
-   * 
+   *
    * Must be called within a Prisma interactive transaction ($transaction).
    * Will throw if insufficient stock.
    */
@@ -252,13 +259,13 @@ export class InventoryService {
       );
     }
 
-    // 3. Decrease the stock
+    // 3. Decrease the stock (WRITE → master)
     await tx.inventory.update({
       where: { id: existing[0].id },
       data: { quantity: currentQty - qty },
     });
 
-    // 4. Record the transaction
+    // 4. Record the transaction (writes to partitioned InventoryTransactions)
     await tx.inventoryTransaction.create({
       data: {
         productId,
@@ -282,7 +289,7 @@ export class InventoryService {
     warehouseId: number,
     locationId: number,
   ): Promise<number> {
-    // Lock the row
+    // Lock the row (within transaction → master)
     const inventory = await tx.$queryRaw<any[]>`
       SELECT id, Quantity FROM Inventory 
       WHERE ProductID = ${productId} 
