@@ -76,7 +76,20 @@ export class SalesOrdersService {
       throw new NotFoundException(`Sales Order #${id} not found`);
     }
 
-    return so;
+    // Fetch StockReservations for this SO to provide pre-filled location data
+    const reservations = await this.prisma.stockReservation.findMany({
+      where: {
+        referenceType: REFERENCE_TYPE.SALES_ORDER,
+        referenceId: id,
+        status: RESERVATION_STATUS.ACTIVE,
+      },
+      include: {
+        location: { select: { id: true, locationCode: true } },
+        warehouse: { select: { id: true, warehouseName: true } },
+      },
+    });
+
+    return { ...so, reservations };
   }
 
   /**

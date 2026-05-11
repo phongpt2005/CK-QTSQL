@@ -7,6 +7,9 @@ import { WarehouseModule } from './modules/warehouse/warehouse.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { PurchaseModule } from './modules/purchase/purchase.module';
 import { SalesModule } from './modules/sales/sales.module';
+import { SupportModule } from './modules/support/support.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { AllocationModule } from './modules/allocation/allocation.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { SalesModule } from './modules/sales/sales.module';
     InventoryModule,
     PurchaseModule,
     SalesModule,
+    SupportModule,
+    NotificationsModule,
+    AllocationModule,
   ],
 })
 export class AppModule {}

@@ -30,6 +30,13 @@ export class ProductsService {
         include: {
           category: { select: { id: true, categoryName: true } },
           unit: { select: { id: true, unitName: true, symbol: true } },
+          inventories: {
+            where: { quantity: { gt: 0 } },
+            include: {
+              warehouse: { select: { id: true, warehouseName: true } },
+              location: { select: { id: true, locationCode: true } },
+            },
+          },
         },
         skip,
         take: limit,

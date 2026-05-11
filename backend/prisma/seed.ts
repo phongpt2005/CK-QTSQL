@@ -7,10 +7,10 @@ const prisma = new PrismaClient();
 async function truncateTables() {
   console.log('🧹 Truncating existing data...');
   const tableNames = [
-    'InventoryTransactions', 'StockReservations', 'Inventory', 
+    'InventoryTransactions', 'StockReservations', 'Inventory',
     'DeliveryNoteDetails', 'DeliveryNotes', 'SalesOrderDetails', 'SalesOrders',
     'GoodsReceiptDetails', 'GoodsReceipts', 'PurchaseOrderDetails', 'PurchaseOrders',
-    'Locations', 'Warehouses', 'Products', 'ProductCategories', 'Units', 
+    'Locations', 'Warehouses', 'Products', 'ProductCategories', 'Units',
     'Suppliers', 'Customers', 'Users'
   ];
 
@@ -69,7 +69,7 @@ async function main() {
   // 4. Suppliers & Customers
   console.log('⏳ Seeding Suppliers (200) and Customers (500)...');
   const suppliersData = Array.from({ length: 200 }).map((_, i) => ({
-    supplierCode: `SUP-${String(i+1).padStart(4, '0')}`,
+    supplierCode: `SUP-${String(i + 1).padStart(4, '0')}`,
     name: faker.company.name(),
     phone: faker.phone.number().substring(0, 20),
     email: faker.internet.email().substring(0, 100),
@@ -80,7 +80,7 @@ async function main() {
   const suppliers = await prisma.supplier.findMany();
 
   const customersData = Array.from({ length: 500 }).map((_, i) => ({
-    customerCode: `CUS-${String(i+1).padStart(4, '0')}`,
+    customerCode: `CUS-${String(i + 1).padStart(4, '0')}`,
     name: faker.company.name(),
     phone: faker.phone.number().substring(0, 20),
     email: faker.internet.email().substring(0, 100),
@@ -146,7 +146,7 @@ async function main() {
       quantity: faker.number.int({ min: 10, max: 1000 })
     };
   });
-  
+
   for (let i = 0; i < inventoryData.length; i += BATCH_SIZE) {
     await prisma.inventory.createMany({
       data: inventoryData.slice(i, i + BATCH_SIZE),
@@ -168,9 +168,9 @@ async function main() {
     }));
     await prisma.purchaseOrder.createMany({ data: poData });
   }
-  
+
   const purchaseOrders = await prisma.purchaseOrder.findMany({ select: { id: true, poCode: true } });
-  
+
   console.log('⏳ Seeding Purchase Order Details...');
   let poDetailsData: any[] = [];
   purchaseOrders.forEach(po => {
@@ -223,7 +223,7 @@ async function main() {
       });
     }
   });
-  
+
   for (let i = 0; i < soDetailsData.length; i += BATCH_SIZE) {
     await prisma.salesOrderDetail.createMany({ data: soDetailsData.slice(i, i + BATCH_SIZE) });
   }
@@ -239,7 +239,7 @@ async function main() {
     transactionDate: faker.date.recent({ days: 60 }),
     note: 'System generated transaction'
   }));
-  
+
   for (let i = 0; i < txData.length; i += BATCH_SIZE) {
     await prisma.inventoryTransaction.createMany({ data: txData.slice(i, i + BATCH_SIZE) });
   }

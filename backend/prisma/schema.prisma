@@ -26,8 +26,23 @@ model User {
   goodsReceipts  GoodsReceipt[]
   salesOrders    SalesOrder[]
   deliveryNotes  DeliveryNote[]
+  passwordResets PasswordReset[]
+  supportTickets SupportTicket[]
 
   @@map("Users")
+}
+
+model PasswordReset {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("UserID")
+  code      String   @map("Code") @db.VarChar(6)
+  expiresAt DateTime @map("ExpiresAt")
+  used      Boolean  @default(false) @map("Used")
+  createdAt DateTime @default(now()) @map("CreatedAt")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("PasswordResets")
 }
 
 // ======================================================
@@ -409,4 +424,21 @@ view TransactionHistoryView {
   referenceId     Int?     @map("ReferenceID")
 
   @@map("TransactionHistoryView")
+}
+
+// ======================================================
+// 9. SUPPORT TICKETS
+// ======================================================
+model SupportTicket {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("UserID")
+  subject     String   @map("Subject") @db.VarChar(255)
+  description String   @map("Description") @db.Text
+  status      String   @default("PENDING") @map("Status") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @map("CreatedAt")
+  updatedAt   DateTime @updatedAt @map("UpdatedAt")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("SupportTickets")
 }

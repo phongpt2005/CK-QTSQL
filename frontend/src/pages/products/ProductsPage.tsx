@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Table, Button, Modal, Form, Input, InputNumber, Select, Space, Tag, Popconfirm, Typography } from 'antd';
+import { Table, Button, Modal, Form, Input, InputNumber, Select, Space, Tag, Popconfirm, Typography, Tooltip } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useCategories, useUnits } from '@/hooks/queries';
 import type { Product, CreateProductDto, UpdateProductDto } from '@/types';
 import numeral from 'numeral';
 import { useAuthStore } from '@/store/auth.store';
+import { PageHeader } from '@/components/common/PageHeader';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 export default function ProductsPage() {
   const [page, setPage] = useState(1);
@@ -48,6 +49,25 @@ export default function ProductsPage() {
     { title: 'Đơn vị', key: 'unit', render: (_: unknown, r: Product) => r.unit?.unitName ?? '—' },
     { title: 'Giá', dataIndex: 'price', key: 'price', render: (v: number) => numeral(v).format('0,0'), align: 'right' as const },
     { title: 'Trạng thái', dataIndex: 'status', key: 'status', width: 100, render: (v: number) => <Tag color={v === 1 ? 'green' : 'default'} style={{ borderRadius: 8 }}>{v === 1 ? 'Hoạt động' : 'Ngưng'}</Tag> },
+    { 
+      title: 'Vị trí lưu kho', 
+      key: 'locations', 
+      width: 250,
+      render: (_: unknown, r: Product) => {
+        if (!r.inventories || r.inventories.length === 0) return <Text type="secondary">Chưa có hàng</Text>;
+        return (
+          <Space size={[0, 8]} wrap>
+            {r.inventories.map((inv, idx) => (
+              <Tooltip key={idx} title={`Kho: ${inv.warehouse?.warehouseName}`}>
+                <Tag color="purple" style={{ borderRadius: 8 }}>
+                  {inv.location?.locationCode} ({inv.quantity})
+                </Tag>
+              </Tooltip>
+            ))}
+          </Space>
+        );
+      }
+    },
     ...(isAdmin ? [{
       title: '', key: 'actions', width: 100,
       render: (_: unknown, r: Product) => (
@@ -62,14 +82,12 @@ export default function ProductsPage() {
   ];
 
   return (
-    <div>
-      <div className="page-header">
-        <div>
-          <div className="page-title"><AppstoreOutlined style={{ color: 'var(--color-primary)' }} /> Sản phẩm</div>
-          <div className="page-subtitle">Quản lý danh sách sản phẩm</div>
-        </div>
-        {isAdmin && <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Thêm sản phẩm</Button>}
-      </div>
+    <div className="stagger-children">
+      <PageHeader 
+        title="Sản phẩm" 
+        subtitle="Quản lý danh sách sản phẩm và thông tin chi tiết"
+        extra={isAdmin && <Button type="primary" icon={<PlusOutlined />} onClick={openCreate} className="neu-btn" style={{ background: '#1e3a8a', color: '#fff' }}>Thêm sản phẩm</Button>}
+      />
 
       <div className="filter-bar">
         <Input placeholder="Tìm kiếm sản phẩm..." prefix={<SearchOutlined />} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} style={{ width: 300 }} allowClear />

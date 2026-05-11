@@ -4,6 +4,7 @@ import { Descriptions, Table, Tag, Button, Modal, Form, DatePicker, Input, Input
 import { ArrowLeftOutlined, CheckCircleOutlined, ImportOutlined } from '@ant-design/icons';
 import { usePurchaseOrder, useCreateGoodsReceipt, useLocations } from '@/hooks/queries';
 import type { GoodsReceiptItemDto } from '@/types';
+import { inventoryService } from '@/services';
 import dayjs from 'dayjs';
 import numeral from 'numeral';
 
@@ -18,23 +19,46 @@ export default function PurchaseOrderDetailPage() {
 
   const [grModalOpen, setGrModalOpen] = useState(false);
   const [grForm] = Form.useForm();
-  const [grItems, setGrItems] = useState<{ key: number; productId: number; productName: string; locationId: number; quantity: number }[]>([]);
+  const [grItems, setGrItems] = useState<{ key: number; productId: number; productName: string; locationId: number; quantity: number; suggestedLocations?: number[] }[]>([]);
 
   if (isLoading) return <div style={{ textAlign: 'center', padding: 80 }}><Spin size="large" /></div>;
   if (!po) return <div>Không tìm thấy đơn nhập #{id}</div>;
 
-  const openGrModal = () => {
-    // Pre-fill from PO details
+  const openGrModal = async () => {
+    // 1. Initial setup
     const items = (po.details ?? []).map((d, i) => ({
       key: i,
       productId: d.productId ?? 0,
       productName: d.product?.productName ?? '',
       locationId: 0,
       quantity: d.quantity,
+      suggestedLocations: [],
     }));
     setGrItems(items);
     grForm.setFieldsValue({ receiptDate: dayjs() });
     setGrModalOpen(true);
+    
+    // 2. Fetch stock locations in background to auto-suggest
+    try {
+       const newItems = await Promise.all(items.map(async (item) => {
+         if (!item.productId) return item;
+         try {
+            const summary = await inventoryService.getByProduct(item.productId);
+            const stockLocs = (summary.details || [])
+              .filter((d: any) => (d.availableQty ?? d.quantity) > 0)
+              .map((d: any) => d.locationId);
+              
+            return {
+               ...item,
+               suggestedLocations: stockLocs,
+               locationId: stockLocs.length === 1 ? stockLocs[0] : 0,
+            };
+         } catch {
+            return item;
+         }
+       }));
+       setGrItems(newItems);
+    } catch {}
   };
 
   const submitGR = async () => {
@@ -124,10 +148,24 @@ export default function PurchaseOrderDetailPage() {
         <Table dataSource={grItems} rowKey="key" pagination={false} size="small" columns={[
           { title: 'Sản phẩm', dataIndex: 'productName', key: 'name' },
           { title: 'SL', dataIndex: 'quantity', key: 'qty', width: 80, render: (v: number, r: any) => <InputNumber min={1} max={v} value={v} onChange={(val) => setGrItems(grItems.map((i) => i.key === r.key ? { ...i, quantity: val ?? 1 } : i))} style={{ width: '100%' }} /> },
-          { title: 'Vị trí kho', key: 'loc', width: 250, render: (_: unknown, r: any) => (
-            <Select placeholder="Chọn vị trí" value={r.locationId || undefined} onChange={(v) => setGrItems(grItems.map((i) => i.key === r.key ? { ...i, locationId: v } : i))} style={{ width: '100%' }}
-              showSearch optionFilterProp="label" options={locations?.map((l) => ({ label: `${l.locationCode} (${l.warehouse?.warehouseName ?? ''})`, value: l.id })) ?? []} />
-          )},
+          { title: 'Vị trí kho', key: 'loc', width: 250, render: (_: unknown, r: any) => {
+            const opts = (locations ?? []).map((l) => {
+               const isSuggested = r.suggestedLocations?.includes(l.id);
+               return {
+                  label: `${l.locationCode} (${l.warehouse?.warehouseName ?? ''})${isSuggested ? ' - Đang chứa SP này' : ''}`,
+                  value: l.id,
+                  isSuggested,
+               };
+            }).sort((a, b) => {
+               if (a.isSuggested && !b.isSuggested) return -1;
+               if (!a.isSuggested && b.isSuggested) return 1;
+               return 0;
+            });
+            return (
+              <Select placeholder="Chọn vị trí" value={r.locationId || undefined} onChange={(v) => setGrItems(grItems.map((i) => i.key === r.key ? { ...i, locationId: v } : i))} style={{ width: '100%' }}
+                showSearch optionFilterProp="label" options={opts} />
+            );
+          }},
         ]} />
       </Modal>
     </div>

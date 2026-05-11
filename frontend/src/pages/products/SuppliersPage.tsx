@@ -4,6 +4,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, TruckOutlined } from '@ant-
 import { useSuppliers, useCreateSupplier, useUpdateSupplier, useDeleteSupplier } from '@/hooks/queries';
 import type { Supplier, CreateSupplierDto } from '@/types';
 import { useAuthStore } from '@/store/auth.store';
+import { PageHeader } from '@/components/common/PageHeader';
 
 export default function SuppliersPage() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -27,14 +28,12 @@ export default function SuppliersPage() {
   };
 
   return (
-    <div>
-      <div className="page-header">
-        <div>
-          <div className="page-title"><TruckOutlined style={{ color: 'var(--color-primary)' }} /> Nhà cung cấp</div>
-          <div className="page-subtitle">Quản lý nhà cung cấp</div>
-        </div>
-        {isAdmin && <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Thêm NCC</Button>}
-      </div>
+    <div className="stagger-children">
+      <PageHeader 
+        title="Nhà cung cấp" 
+        subtitle="Quản lý thông tin và danh sách các nhà cung cấp"
+        extra={isAdmin && <Button type="primary" icon={<PlusOutlined />} onClick={openCreate} className="neu-btn" style={{ background: '#1e3a8a', color: '#fff' }}>Thêm NCC</Button>}
+      />
       <div className="content-card">
         <Table dataSource={items} rowKey="id" loading={isLoading} pagination={false} columns={[
           { title: 'Mã NCC', dataIndex: 'supplierCode', key: 'code', width: 120, render: (v: string) => <Tag style={{ borderRadius: 8 }}>{v}</Tag> },

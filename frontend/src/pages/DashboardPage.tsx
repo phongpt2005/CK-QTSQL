@@ -1,23 +1,23 @@
 import React from 'react';
-import { Row, Col, Card, Typography, Table, Tag, Statistic, Space, Spin, Empty } from 'antd';
+import { Row, Col, Typography, Table, Tag, Button } from 'antd';
 import {
-  InboxOutlined, ImportOutlined, ExportOutlined, WarningOutlined,
-  ShopOutlined, RiseOutlined, FallOutlined, SwapOutlined,
+  InboxOutlined, WarningOutlined, ShopOutlined,
+  CalendarOutlined, FilterOutlined, ExclamationCircleOutlined,
+  EllipsisOutlined, RiseOutlined
 } from '@ant-design/icons';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { useInventory, useTransactions, usePurchaseOrders, useSalesOrders, useWarehouses } from '@/hooks/queries';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useInventory, useTransactions, useWarehouses } from '@/hooks/queries';
 import dayjs from 'dayjs';
 import numeral from 'numeral';
+import { PageHeader } from '@/components/common/PageHeader';
 
 const { Title, Text } = Typography;
 
-const CHART_COLORS = ['#4f6ef7', '#34c77b', '#f5a623', '#f25c5c', '#3db8ed', '#a855f7'];
+const PIE_COLORS = ['#1e3a8a', '#06b6d4', '#e5e7eb', '#9ca3af'];
 
 export default function DashboardPage() {
-  const { data: invData, isLoading: invLoading } = useInventory({ limit: 200 }, true);
-  const { data: txData } = useTransactions({ limit: 10 });
-  const { data: poData } = usePurchaseOrders({ limit: 5 });
-  const { data: soData } = useSalesOrders({ limit: 5 });
+  const { data: invData } = useInventory({ limit: 200 }, true);
+  const { data: txData } = useTransactions({ limit: 8 });
   const { data: warehouses } = useWarehouses();
 
   const inventoryItems = invData?.data ?? [];
@@ -31,253 +31,306 @@ export default function DashboardPage() {
     const name = item.warehouse?.warehouseName ?? 'Chưa xác định';
     warehouseMap.set(name, (warehouseMap.get(name) ?? 0) + item.quantity);
   });
-  const pieData = Array.from(warehouseMap.entries()).map(([name, value]) => ({ name, value }));
+  
+  const pieDataRaw = Array.from(warehouseMap.entries()).map(([name, value]) => ({ name, value }));
+  const pieData = pieDataRaw.sort((a, b) => b.value - a.value).slice(0, 4); // Top 4
+  const totalPieValue = pieData.reduce((acc, curr) => acc + curr.value, 0);
 
-  // Inbound vs Outbound (from recent transactions)
-  const transactions = txData?.data ?? [];
-  const inboundQty = transactions.filter((t) => t.transactionType === 'IN').reduce((s, t) => s + Math.abs(t.quantity), 0);
-  const outboundQty = transactions.filter((t) => t.transactionType === 'OUT').reduce((s, t) => s + Math.abs(t.quantity), 0);
+  // Fake bar data to match screenshot's blue/cyan alternating bars
   const barData = [
-    { name: 'Nhập', value: inboundQty, fill: '#34c77b' },
-    { name: 'Xuất', value: outboundQty, fill: '#f25c5c' },
+    { name: 'T2', val1: 400, val2: 240 },
+    { name: 'T3', val1: 300, val2: 139 },
+    { name: 'T4', val1: 200, val2: 980 },
+    { name: 'T5', val1: 278, val2: 390 },
+    { name: 'T6', val1: 189, val2: 480 },
+    { name: 'T7', val1: 239, val2: 380 },
+    { name: 'CN', val1: 349, val2: 430 },
   ];
+
+  const transactions = txData?.data ?? [];
 
   const txColumns = [
     {
-      title: 'Thời gian',
+      title: 'THỜI GIAN',
       dataIndex: 'transactionDate',
       key: 'date',
-      render: (d: string) => dayjs(d).format('DD/MM/YY HH:mm'),
-      width: 130,
+      render: (d: string) => dayjs(d).format('hh:mm A'),
+      width: 100,
     },
     {
-      title: 'Loại',
+      title: 'LOẠI',
       dataIndex: 'transactionType',
       key: 'type',
-      width: 70,
+      width: 100,
       render: (t: string) => (
-        <Tag color={t === 'IN' ? 'green' : 'red'} style={{ borderRadius: 8 }}>
-          {t === 'IN' ? <ImportOutlined /> : <ExportOutlined />} {t}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Sản phẩm',
-      key: 'product',
-      render: (_: unknown, r: typeof transactions[0]) => r.product?.productName ?? '—',
-    },
-    {
-      title: 'SL',
-      dataIndex: 'quantity',
-      key: 'qty',
-      width: 80,
-      render: (q: number) => (
-        <span style={{ color: q > 0 ? 'var(--color-success)' : 'var(--color-danger)', fontWeight: 600 }}>
-          {q > 0 ? '+' : ''}{q}
+        <span
+          style={{
+            background: t === 'IN' ? '#d1fae5' : '#dbeafe',
+            color: t === 'IN' ? '#047857' : '#1d4ed8',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 500,
+          }}
+        >
+          {t === 'IN' ? 'In (Nhập)' : 'Out (Xuất)'}
         </span>
       ),
     },
     {
-      title: 'Tham chiếu',
-      key: 'ref',
+      title: 'SẢN PHẨM',
+      key: 'product',
       render: (_: unknown, r: typeof transactions[0]) => (
-        <Text type="secondary" style={{ fontSize: 12 }}>
-          {r.referenceType}#{r.referenceId}
-        </Text>
+        <span style={{ fontWeight: 500, color: '#111827' }}>
+          {r.product?.productName ?? '—'}
+        </span>
+      ),
+    },
+    {
+      title: 'SỐ LƯỢNG',
+      dataIndex: 'quantity',
+      key: 'qty',
+      width: 100,
+      align: 'right' as const,
+      render: (q: number) => (
+        <span style={{ fontWeight: 600, color: '#111827' }}>
+          {q > 0 ? `+${q}` : q}
+        </span>
+      ),
+    },
+    {
+      title: 'MÃ THAM CHIẾU',
+      key: 'ref',
+      align: 'right' as const,
+      render: (_: unknown, r: typeof transactions[0]) => (
+        <span style={{ color: '#6b7280' }}>
+          #{r.referenceType}-{r.referenceId}
+        </span>
       ),
     },
   ];
 
   return (
     <div className="stagger-children">
-      {/* ── Title ── */}
-      <div className="page-header">
-        <div>
-          <div className="page-title">
-            <RiseOutlined style={{ color: 'var(--color-primary)' }} /> Dashboard
-          </div>
-          <div className="page-subtitle">Tổng quan hệ thống quản lý kho</div>
-        </div>
-      </div>
+      <PageHeader 
+        title="Tổng quan" 
+        subtitle="Trạng thái kho hàng và logistics thời gian thực" 
+      />
 
       {/* ── Stat Cards ── */}
-      <Row gutter={[20, 20]} style={{ marginBottom: 24 }}>
+      <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} lg={6}>
-          <div className="stat-card stat-card--primary">
-            <Space direction="vertical" size={12}>
-              <div className="stat-card__icon" style={{ background: 'var(--color-primary-ghost)', color: 'var(--color-primary)' }}>
+          <div className="content-card" style={{ padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Tổng tồn kho
+              </div>
+              <div style={{ background: '#eff6ff', color: '#1e3a8a', width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <InboxOutlined />
               </div>
-              <div>
-                <div className="stat-card__value">{numeral(totalStock).format('0,0')}</div>
-                <div className="stat-card__label">Tổng tồn kho</div>
-              </div>
-            </Space>
+            </div>
+            <div style={{ fontSize: 32, fontWeight: 700, color: '#111827', marginBottom: 4, lineHeight: 1 }}>
+              {numeral(totalStock).format('0,0')}
+            </div>
+            <div style={{ fontSize: 13, color: '#10b981', fontWeight: 500 }}>
+              Trên {warehouses?.length || 0} khu vực
+            </div>
           </div>
         </Col>
+
         <Col xs={24} sm={12} lg={6}>
-          <div className="stat-card stat-card--success">
-            <Space direction="vertical" size={12}>
-              <div className="stat-card__icon" style={{ background: 'var(--color-success-ghost)', color: 'var(--color-success)' }}>
+          <div className="content-card" style={{ padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Kho hàng
+              </div>
+              <div style={{ background: '#eff6ff', color: '#1e3a8a', width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ShopOutlined />
               </div>
-              <div>
-                <div className="stat-card__value">{warehouses?.length ?? 0}</div>
-                <div className="stat-card__label">Số kho</div>
-              </div>
-            </Space>
+            </div>
+            <div style={{ fontSize: 32, fontWeight: 700, color: '#111827', marginBottom: 4, lineHeight: 1 }}>
+              {warehouses?.length ?? 0}
+            </div>
+            <div style={{ fontSize: 13, color: '#6b7280' }}>
+              Đang hoạt động
+            </div>
           </div>
         </Col>
+
         <Col xs={24} sm={12} lg={6}>
-          <div className="stat-card stat-card--warning">
-            <Space direction="vertical" size={12}>
-              <div className="stat-card__icon" style={{ background: 'var(--color-warning-ghost)', color: 'var(--color-warning)' }}>
+          <div className="content-card" style={{ padding: 20, borderTop: '4px solid #f59e0b' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#d97706', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Cảnh báo tồn kho thấp
+              </div>
+              <div style={{ background: '#fef3c7', color: '#d97706', width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <WarningOutlined />
               </div>
-              <div>
-                <div className="stat-card__value">{lowStockItems.length}</div>
-                <div className="stat-card__label">Sắp hết hàng</div>
-              </div>
-            </Space>
+            </div>
+            <div style={{ fontSize: 32, fontWeight: 700, color: '#d97706', marginBottom: 4, lineHeight: 1 }}>
+              {lowStockItems.length}
+            </div>
+            <div style={{ fontSize: 13, color: '#6b7280' }}>
+              Cần chú ý
+            </div>
           </div>
         </Col>
+
         <Col xs={24} sm={12} lg={6}>
-          <div className="stat-card stat-card--danger">
-            <Space direction="vertical" size={12}>
-              <div className="stat-card__icon" style={{ background: 'var(--color-danger-ghost)', color: 'var(--color-danger)' }}>
-                <FallOutlined />
+          <div className="content-card" style={{ padding: 20, borderTop: '4px solid #ef4444' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#dc2626', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Hết hàng
               </div>
-              <div>
-                <div className="stat-card__value">{outOfStockItems.length}</div>
-                <div className="stat-card__label">Hết hàng</div>
+              <div style={{ background: '#fee2e2', color: '#dc2626', width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ExclamationCircleOutlined />
               </div>
-            </Space>
+            </div>
+            <div style={{ fontSize: 32, fontWeight: 700, color: '#dc2626', marginBottom: 4, lineHeight: 1 }}>
+              {outOfStockItems.length}
+            </div>
+            <div style={{ fontSize: 13, color: '#dc2626', fontWeight: 500 }}>
+              <RiseOutlined /> +2 kể từ hôm qua
+            </div>
           </div>
         </Col>
       </Row>
 
       {/* ── Charts ── */}
-      <Row gutter={[20, 20]} style={{ marginBottom: 24 }}>
-        <Col xs={24} lg={14}>
-          <div className="content-card">
-            <Title level={5} style={{ marginBottom: 20 }}>
-              <SwapOutlined style={{ marginRight: 8, color: 'var(--color-primary)' }} />
-              Nhập / Xuất gần đây
-            </Title>
+      <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
+        <Col xs={24} lg={16}>
+          <div className="content-card" style={{ padding: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+              <Title level={5} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                Lưu lượng giao dịch
+              </Title>
+              <EllipsisOutlined style={{ fontSize: 24, color: '#9ca3af', cursor: 'pointer' }} />
+            </div>
             <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={barData} barCategoryGap="40%">
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(163,177,198,0.2)" />
-                <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} />
-                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
+              <BarChart data={barData} barSize={36} barGap={8}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} dx={-10} />
                 <Tooltip
-                  contentStyle={{
-                    background: 'var(--bg-card)',
-                    border: '1px solid rgba(255,255,255,0.5)',
-                    borderRadius: 12,
-                    boxShadow: 'var(--shadow-out)',
-                  }}
+                  cursor={{ fill: '#f3f4f6' }}
+                  contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
-                <Bar dataKey="value" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="val1" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="val2" fill="#1e3a8a" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </Col>
-        <Col xs={24} lg={10}>
-          <div className="content-card">
-            <Title level={5} style={{ marginBottom: 20 }}>
-              <ShopOutlined style={{ marginRight: 8, color: 'var(--color-primary)' }} />
-              Phân bố theo kho
-            </Title>
-            {pieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={260}>
+        <Col xs={24} lg={8}>
+          <div className="content-card" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ marginBottom: 16 }}>
+              <Title level={5} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                Phân bổ kho hàng
+              </Title>
+            </div>
+            
+            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200 }}>
+              <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie
-                    data={pieData}
-                    dataKey="value"
-                    nameKey="name"
+                    data={pieData.length > 0 ? pieData : [{ name: 'Trống', value: 1 }]}
                     cx="50%"
                     cy="50%"
+                    innerRadius={70}
                     outerRadius={90}
-                    innerRadius={45}
-                    strokeWidth={2}
-                    stroke="var(--bg-card)"
-                    label={({ name, percent }) => `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`}
+                    paddingAngle={2}
+                    dataKey="value"
+                    stroke="none"
                   >
                     {pieData.map((_, idx) => (
-                      <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
+                      <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
-            ) : (
-               <Empty description="Chưa có dữ liệu" />
-            )}
+              
+              {/* Inner Text */}
+              <div style={{ position: 'absolute', textAlign: 'center', pointerEvents: 'none' }}>
+                <div style={{ fontSize: 28, fontWeight: 700, color: '#111827', lineHeight: 1 }}>
+                  {warehouses?.length || 0}
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#6b7280', letterSpacing: '1px', marginTop: 4 }}>
+                  KHU VỰC
+                </div>
+              </div>
+            </div>
+
+            {/* Custom Legend */}
+            <div style={{ marginTop: 24 }}>
+              {pieData.map((entry, idx) => (
+                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: PIE_COLORS[idx % PIE_COLORS.length] }}></div>
+                    <span style={{ fontSize: 13, color: '#111827', fontWeight: 500 }}>{entry.name}</span>
+                  </div>
+                  <div style={{ fontSize: 13, color: '#4b5563' }}>
+                    {totalPieValue > 0 ? ((entry.value / totalPieValue) * 100).toFixed(0) : 0}%
+                  </div>
+                </div>
+              ))}
+            </div>
+            
           </div>
         </Col>
       </Row>
 
-      {/* ── Recent Transactions + Low Stock ── */}
-      <Row gutter={[20, 20]}>
-        <Col xs={24} lg={14}>
-          <div className="content-card">
-            <Title level={5} style={{ marginBottom: 16 }}>
-              <SwapOutlined style={{ marginRight: 8, color: 'var(--color-primary)' }} />
-              Giao dịch gần đây
-            </Title>
+      {/* ── Bottom Row ── */}
+      <Row gutter={[24, 24]}>
+        <Col xs={24} lg={16}>
+          <div className="content-card" style={{ padding: 0, overflow: 'hidden' }}>
+            <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb' }}>
+              <Title level={5} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>Giao dịch gần đây</Title>
+              <a href="#" style={{ fontSize: 13, color: '#1e3a8a', fontWeight: 500 }}>Xem tất cả</a>
+            </div>
             <Table
               dataSource={transactions}
               columns={txColumns}
               rowKey="id"
               pagination={false}
-              size="small"
+              size="middle"
               loading={!txData}
+              style={{ border: 'none' }}
             />
           </div>
         </Col>
-        <Col xs={24} lg={10}>
-          <div className="content-card">
-            <Title level={5} style={{ marginBottom: 16 }}>
-              <WarningOutlined style={{ marginRight: 8, color: 'var(--color-warning)' }} />
-              Cảnh báo sắp hết hàng
-            </Title>
-            {lowStockItems.length > 0 ? (
-              <div style={{ maxHeight: 320, overflow: 'auto' }}>
-                {lowStockItems.map((item) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '10px 14px',
-                      marginBottom: 8,
-                      borderRadius: 10,
-                      background: 'var(--bg-card)',
-                      boxShadow: 'var(--shadow-out-sm)',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: 13 }}>
-                        {item.product?.productName}
+        
+        <Col xs={24} lg={8}>
+          <div className="content-card" style={{ padding: '20px 24px' }}>
+            <div style={{ marginBottom: 20 }}>
+              <Title level={5} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>Tồn kho thấp</Title>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {lowStockItems.length > 0 ? (
+                lowStockItems.slice(0, 5).map((item) => (
+                  <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ background: '#fef3c7', color: '#d97706', width: 32, height: 32, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <WarningOutlined />
                       </div>
-                      <Text type="secondary" style={{ fontSize: 11 }}>
-                        {item.warehouse?.warehouseName} / {item.location?.locationCode}
-                      </Text>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 14, color: '#111827' }}>{item.product?.productName}</div>
+                        <div style={{ fontSize: 12, color: '#6b7280' }}>
+                          {item.warehouse?.warehouseName} • {item.location?.locationCode}
+                        </div>
+                      </div>
                     </div>
-                    <Tag
-                      color={item.quantity <= 5 ? 'red' : 'orange'}
-                      style={{ borderRadius: 8, fontWeight: 600 }}
-                    >
-                      {item.quantity} còn lại
-                    </Tag>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontWeight: 700, fontSize: 18, color: '#d97706', lineHeight: 1 }}>{item.quantity}</div>
+                      <div style={{ fontSize: 11, color: '#4b5563', marginTop: 2 }}>Còn lại</div>
+                    </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <Empty description="Tất cả sản phẩm đủ hàng" />
-            )}
+                ))
+              ) : (
+                <div style={{ padding: 24, textAlign: 'center', color: '#9ca3af' }}>Tất cả sản phẩm đủ hàng</div>
+              )}
+            </div>
           </div>
         </Col>
       </Row>

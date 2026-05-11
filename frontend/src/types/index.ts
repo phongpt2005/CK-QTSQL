@@ -46,6 +46,16 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
 export interface LoginResponse {
   access_token: string;
   user: AuthUser;
@@ -133,6 +143,11 @@ export interface Product {
   isDeleted: boolean;
   category?: ProductCategory | null;
   unit?: Unit | null;
+  inventories?: {
+    warehouse?: { id: number; warehouseName: string };
+    location?: { id: number; locationCode: string };
+    quantity: number;
+  }[];
 }
 
 export interface CreateProductDto {
@@ -454,6 +469,7 @@ export interface InventoryProductSummary {
 }
 
 // ── Inventory Transactions ──
+export * from './support';
 export interface InventoryTransaction {
   id: number;
   productId: number | null;

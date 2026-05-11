@@ -19,8 +19,8 @@ export class SalesOrderItemDto {
   locationId!: number;
 
   @ApiProperty({ example: 10 })
-  @IsInt()
-  @Min(1)
+  @IsInt({ message: 'Số lượng phải là số nguyên' })
+  @Min(1, { message: 'Số lượng không được nhỏ hơn 1' })
   @Type(() => Number)
   quantity!: number;
 
@@ -64,8 +64,8 @@ export class DeliveryNoteItemDto {
   locationId!: number;
 
   @ApiProperty({ example: 10, description: 'Quantity to deliver' })
-  @IsInt()
-  @Min(1)
+  @IsInt({ message: 'Số lượng phải là số nguyên' })
+  @Min(1, { message: 'Số lượng không được nhỏ hơn 1' })
   @Type(() => Number)
   quantity!: number;
 }

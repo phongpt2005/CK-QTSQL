@@ -4,6 +4,7 @@ import { SwapOutlined, ImportOutlined, ExportOutlined } from '@ant-design/icons'
 import { useTransactions, useWarehouses } from '@/hooks/queries';
 import type { InventoryTransaction } from '@/types';
 import dayjs from 'dayjs';
+import { PageHeader } from '@/components/common/PageHeader';
 
 const { Text } = Typography;
 
@@ -57,13 +58,11 @@ export default function TransactionsPage() {
   ];
 
   return (
-    <div>
-      <div className="page-header">
-        <div>
-          <div className="page-title"><SwapOutlined style={{ color: 'var(--color-primary)' }} /> Lịch sử giao dịch</div>
-          <div className="page-subtitle">Theo dõi tất cả biến động tồn kho</div>
-        </div>
-      </div>
+    <div className="stagger-children">
+      <PageHeader 
+        title="Lịch sử giao dịch" 
+        subtitle="Theo dõi tất cả biến động nhập/xuất tồn kho theo thời gian thực"
+      />
       <div className="filter-bar">
         <Select placeholder="Lọc theo kho" allowClear style={{ width: 240 }} onChange={(v) => { setWhFilter(v); setPage(1); }}
           options={warehouses?.map((w) => ({ label: w.warehouseName, value: w.id })) ?? []} />

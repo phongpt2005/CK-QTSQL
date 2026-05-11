@@ -3,6 +3,7 @@ import { Table, Button, Modal, Form, Input, Space, Popconfirm, Tag, Typography }
 import { PlusOutlined, EditOutlined, DeleteOutlined, ShopOutlined } from '@ant-design/icons';
 import { useWarehouses, useCreateWarehouse, useUpdateWarehouse, useDeleteWarehouse } from '@/hooks/queries';
 import type { Warehouse, CreateWarehouseDto } from '@/types';
+import { PageHeader } from '@/components/common/PageHeader';
 
 export default function WarehousesPage() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -23,14 +24,12 @@ export default function WarehousesPage() {
   };
 
   return (
-    <div>
-      <div className="page-header">
-        <div>
-          <div className="page-title"><ShopOutlined style={{ color: 'var(--color-primary)' }} /> Kho hàng</div>
-          <div className="page-subtitle">Quản lý danh sách kho</div>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Thêm kho</Button>
-      </div>
+    <div className="stagger-children">
+      <PageHeader 
+        title="Kho hàng" 
+        subtitle="Quản lý danh sách các kho hàng trong hệ thống"
+        extra={<Button type="primary" icon={<PlusOutlined />} onClick={openCreate} className="neu-btn" style={{ background: '#1e3a8a', color: '#fff' }}>Thêm kho</Button>}
+      />
       <div className="content-card">
         <Table dataSource={data ?? []} rowKey="id" loading={isLoading} pagination={false} columns={[
           { title: 'Tên kho', dataIndex: 'warehouseName', key: 'name', render: (v: string) => <span style={{ fontWeight: 600 }}>{v}</span> },

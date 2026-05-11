@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS `PasswordResets` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `UserID` INT NOT NULL,
+  `Code` VARCHAR(6) NOT NULL,
+  `ExpiresAt` DATETIME NOT NULL,
+  `Used` BOOLEAN NOT NULL DEFAULT false,
+  `CreatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  INDEX `idx_password_reset_user` (`UserID`),
+  CONSTRAINT `PasswordResets_UserID_fkey` FOREIGN KEY (`UserID`) REFERENCES `Users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+);

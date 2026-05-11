@@ -1,6 +1,7 @@
 import api from './api';
 import type {
   ApiResponse, PaginatedResult, LoginRequest, LoginResponse, RegisterRequest,
+  ForgotPasswordRequest, ResetPasswordRequest,
   Product, CreateProductDto, UpdateProductDto,
   ProductCategory, CreateCategoryDto, UpdateCategoryDto,
   Unit, CreateUnitDto, UpdateUnitDto,
@@ -15,7 +16,7 @@ import type {
   InventoryItem, InventoryQuery, InventoryProductSummary,
   InventoryTransaction, TransactionQuery,
   User, CreateUserDto, UpdateUserDto,
-  PaginationQuery,
+  PaginationQuery, SupportTicket, CreateTicketDto
 } from '@/types';
 
 // ── Helpers ──
@@ -31,6 +32,10 @@ export const authService = {
     api.post<ApiResponse<LoginResponse>>('/auth/login', data).then(unwrap),
   register: (data: RegisterRequest) =>
     api.post<ApiResponse<LoginResponse>>('/auth/register', data).then(unwrap),
+  forgotPassword: (data: ForgotPasswordRequest) =>
+    api.post<ApiResponse<{ message: string }>>('/auth/forgot-password', data).then(unwrap),
+  resetPassword: (data: ResetPasswordRequest) =>
+    api.post<ApiResponse<{ message: string }>>('/auth/reset-password', data).then(unwrap),
 };
 
 // ============================================================
@@ -201,4 +206,16 @@ export const inventoryService = {
     api.get<ApiResponse<InventoryProductSummary>>(`/inventory/${productId}`).then(unwrap),
   getTransactions: (q?: TransactionQuery) =>
     api.get<ApiResponse<PaginatedResult<InventoryTransaction>>>('/inventory/transactions', { params: q }).then(unwrap),
+};
+
+// ============================================================
+// SUPPORT
+// ============================================================
+export const supportService = {
+  getAll: () =>
+    api.get<ApiResponse<SupportTicket[]>>('/support/tickets').then(unwrap),
+  create: (data: CreateTicketDto) =>
+    api.post<ApiResponse<{ message: string }>>('/support/tickets', data).then(unwrap),
+  updateStatus: (id: number, status: string) =>
+    api.patch<ApiResponse<{ success: boolean }>>(`/support/tickets/${id}/status`, { status }).then(unwrap),
 };

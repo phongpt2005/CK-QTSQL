@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Descriptions, Table, Tag, Button, Modal, Form, DatePicker, Input, InputNumber, Select, Space, Typography, Spin, Divider, message } from 'antd';
 import { ArrowLeftOutlined, CheckCircleOutlined, ExportOutlined } from '@ant-design/icons';
 import { useSalesOrder, useCreateDeliveryNote, useLocations } from '@/hooks/queries';
+import { inventoryService } from '@/services';
 import dayjs from 'dayjs';
 import numeral from 'numeral';
 
@@ -16,18 +17,56 @@ export default function SalesOrderDetailPage() {
   const createDN = useCreateDeliveryNote();
   const [dnModalOpen, setDnModalOpen] = useState(false);
   const [dnForm] = Form.useForm();
-  const [dnItems, setDnItems] = useState<{ key: number; productId: number; productName: string; locationId: number; quantity: number }[]>([]);
+  const [dnItems, setDnItems] = useState<{ key: number; productId: number; productName: string; locationId: number; quantity: number; stockLocations?: number[] }[]>([]);
 
   if (isLoading) return <div style={{ textAlign: 'center', padding: 80 }}><Spin size="large" /></div>;
   if (!so) return <div>Không tìm thấy đơn xuất #{id}</div>;
 
-  const openDnModal = () => {
-    const items = (so.details ?? []).map((d, i) => ({
-      key: i, productId: d.productId ?? 0, productName: d.product?.productName ?? '', locationId: 0, quantity: d.quantity,
-    }));
+  const openDnModal = async () => {
+    // Use StockReservation data to auto-fill locations
+    const reservations: any[] = (so as any).reservations ?? [];
+
+    const items = (so.details ?? []).map((d, i) => {
+      // Find the reservation matching this product
+      const reservation = reservations.find((r: any) => r.productId === d.productId);
+      return {
+        key: i,
+        productId: d.productId ?? 0,
+        productName: d.product?.productName ?? '',
+        locationId: reservation?.locationId ?? 0,
+        quantity: d.quantity,
+        stockLocations: [],
+      };
+    });
     setDnItems(items);
     dnForm.setFieldsValue({ deliveryDate: dayjs() });
     setDnModalOpen(true);
+    
+    // Fetch available stock locations to filter the dropdown (in case user wants to change)
+    try {
+       const newItems = await Promise.all(items.map(async (item) => {
+         if (!item.productId) return item;
+         try {
+            const summary = await inventoryService.getByProduct(item.productId);
+            // Include locations that either have available stock OR already have reserved stock
+            const stockLocs = (summary.details || [])
+              .filter((d: any) => (d.availableQty ?? d.quantity) > 0 || (d.reservedQty && d.reservedQty > 0))
+              .map((d: any) => d.locationId);
+              
+            return {
+               ...item,
+               stockLocations: stockLocs,
+               // Keep the pre-filled locationId from reservation if it's valid, otherwise auto-select if only 1
+               locationId: item.locationId && stockLocs.includes(item.locationId)
+                 ? item.locationId
+                 : (stockLocs.length === 1 ? stockLocs[0] : item.locationId),
+            };
+         } catch {
+            return item;
+         }
+       }));
+       setDnItems(newItems);
+    } catch {}
   };
 
   const submitDN = async () => {
@@ -115,10 +154,18 @@ export default function SalesOrderDetailPage() {
         <Table dataSource={dnItems} rowKey="key" pagination={false} size="small" columns={[
           { title: 'Sản phẩm', dataIndex: 'productName', key: 'name' },
           { title: 'SL', dataIndex: 'quantity', key: 'qty', width: 80, render: (v: number, r: any) => <InputNumber min={1} max={v} value={v} onChange={(val) => setDnItems(dnItems.map((i) => i.key === r.key ? { ...i, quantity: val ?? 1 } : i))} style={{ width: '100%' }} /> },
-          { title: 'Vị trí xuất', key: 'loc', width: 250, render: (_: unknown, r: any) => (
-            <Select placeholder="Chọn vị trí" value={r.locationId || undefined} onChange={(v) => setDnItems(dnItems.map((i) => i.key === r.key ? { ...i, locationId: v } : i))} style={{ width: '100%' }}
-              showSearch optionFilterProp="label" options={locations?.map((l) => ({ label: `${l.locationCode} (${l.warehouse?.warehouseName ?? ''})`, value: l.id })) ?? []} />
-          )},
+          { title: 'Vị trí xuất', key: 'loc', width: 250, render: (_: unknown, r: any) => {
+            // Only show locations that actually have stock
+            const validLocIds = new Set(r.stockLocations || []);
+            const locOptions = (locations ?? [])
+              .filter(l => validLocIds.has(l.id))
+              .map(l => ({ label: `${l.locationCode} (${l.warehouse?.warehouseName ?? ''})`, value: l.id }));
+              
+            return (
+              <Select placeholder="Chọn vị trí" value={r.locationId || undefined} onChange={(v) => setDnItems(dnItems.map((i) => i.key === r.key ? { ...i, locationId: v } : i))} style={{ width: '100%' }}
+                showSearch optionFilterProp="label" options={locOptions} disabled={locOptions.length === 0} />
+            );
+          }},
         ]} />
       </Modal>
     </div>

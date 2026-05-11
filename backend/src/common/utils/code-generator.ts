@@ -1,7 +1,4 @@
-/**
- * Generates a unique code with prefix and date-based format.
- * Example: PO-20260419-001
- */
+
 export function generateCode(prefix: string, sequence?: number): string {
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
@@ -9,10 +6,7 @@ export function generateCode(prefix: string, sequence?: number): string {
   return `${prefix}-${dateStr}-${seq}`;
 }
 
-/**
- * Generates a unique code with timestamp for higher uniqueness.
- * Example: PO-20260419-143052-001
- */
+
 export function generateUniqueCode(prefix: string): string {
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');

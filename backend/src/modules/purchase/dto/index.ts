@@ -9,8 +9,8 @@ export class PurchaseOrderItemDto {
   productId!: number;
 
   @ApiProperty({ example: 100 })
-  @IsInt()
-  @Min(1)
+  @IsInt({ message: 'Số lượng phải là số nguyên' })
+  @Min(1, { message: 'Số lượng không được nhỏ hơn 1' })
   @Type(() => Number)
   quantity!: number;
 
@@ -54,8 +54,8 @@ export class GoodsReceiptItemDto {
   locationId!: number;
 
   @ApiProperty({ example: 50, description: 'Quantity received' })
-  @IsInt()
-  @Min(1)
+  @IsInt({ message: 'Số lượng phải là số nguyên' })
+  @Min(1, { message: 'Số lượng không được nhỏ hơn 1' })
   @Type(() => Number)
   quantity!: number;
 }
