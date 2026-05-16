@@ -141,7 +141,6 @@ export default function AppLayout() {
   const adminItems = [
     { key: '/users', icon: <UserOutlined />, label: isVi ? 'Người dùng' : 'Users' },
     { key: '/admin/support', icon: <QuestionCircleOutlined />, label: isVi ? 'Quản lý Hỗ trợ' : 'Support Admin' },
-    { key: '/admin/architecture', icon: <DatabaseOutlined />, label: isVi ? 'Kiến trúc hệ thống' : 'System Architecture' },
   ];
 
   const allMenuItems = user?.role === 'Admin' ? [...menuItems, ...adminItems] : menuItems;

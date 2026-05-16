@@ -23,7 +23,7 @@ export class SalesOrdersService {
     if (query?.status) where.status = query.status;
 
     const [data, total] = await Promise.all([
-      this.prisma.salesOrder.findMany({
+      this.prisma.reader.salesOrder.findMany({
         where,
         include: {
           customer: { select: { id: true, customerCode: true, name: true } },
@@ -39,7 +39,7 @@ export class SalesOrdersService {
         take: limit,
         orderBy: { id: 'desc' },
       }),
-      this.prisma.salesOrder.count({ where }),
+      this.prisma.reader.salesOrder.count({ where }),
     ]);
 
     return {
@@ -49,7 +49,7 @@ export class SalesOrdersService {
   }
 
   async findOne(id: number) {
-    const so = await this.prisma.salesOrder.findUnique({
+    const so = await this.prisma.reader.salesOrder.findUnique({
       where: { id },
       include: {
         customer: true,
@@ -77,7 +77,7 @@ export class SalesOrdersService {
     }
 
     // Fetch StockReservations for this SO to provide pre-filled location data
-    const reservations = await this.prisma.stockReservation.findMany({
+    const reservations = await this.prisma.reader.stockReservation.findMany({
       where: {
         referenceType: REFERENCE_TYPE.SALES_ORDER,
         referenceId: id,
@@ -103,7 +103,7 @@ export class SalesOrdersService {
    */
   async create(dto: CreateSalesOrderDto, userId: number) {
     // Validate customer
-    const customer = await this.prisma.customer.findFirst({
+    const customer = await this.prisma.reader.customer.findFirst({
       where: { id: dto.customerId, isDeleted: false },
     });
     if (!customer) {
@@ -112,7 +112,7 @@ export class SalesOrdersService {
 
     // Validate all products exist
     for (const item of dto.items) {
-      const product = await this.prisma.product.findFirst({
+      const product = await this.prisma.reader.product.findFirst({
         where: { id: item.productId, isDeleted: false },
       });
       if (!product) {

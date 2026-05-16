@@ -18,12 +18,12 @@ let CategoriesService = class CategoriesService {
         this.prisma = prisma;
     }
     async findAll() {
-        return this.prisma.productCategory.findMany({
+        return this.prisma.reader.productCategory.findMany({
             orderBy: { id: 'desc' },
         });
     }
     async findOne(id) {
-        const category = await this.prisma.productCategory.findFirst({
+        const category = await this.prisma.reader.productCategory.findFirst({
             where: { id },
             include: { products: { where: { isDeleted: false }, select: { id: true, productCode: true, productName: true } } },
         });

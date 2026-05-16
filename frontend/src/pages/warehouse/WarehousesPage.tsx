@@ -36,6 +36,11 @@ export default function WarehousesPage() {
           { title: 'Địa chỉ', dataIndex: 'address', key: 'address', ellipsis: true },
           { title: 'SĐT', dataIndex: 'phone', key: 'phone' },
           { title: 'Quản lý', dataIndex: 'managerName', key: 'manager' },
+          { title: 'Server Phân mảnh', key: 'shard', width: 170, render: (_: unknown, r: Warehouse) => (
+            <Tag color={r.id <= 10 ? 'blue' : 'green'} style={{ borderRadius: 8 }}>
+              {r.id <= 10 ? '📍 Shard Miền Bắc' : '📍 Shard Miền Nam'}
+            </Tag>
+          )},
           { title: 'TT', dataIndex: 'status', key: 'status', width: 90, render: (v: number) => <Tag color={v === 1 ? 'green' : 'default'} style={{ borderRadius: 8 }}>{v === 1 ? 'Hoạt động' : 'Ngưng'}</Tag> },
           { title: '', key: 'act', width: 100, render: (_: unknown, r: Warehouse) => (
             <Space>

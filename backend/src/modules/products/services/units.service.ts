@@ -7,13 +7,13 @@ export class UnitsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.unit.findMany({
+    return this.prisma.reader.unit.findMany({
       orderBy: { id: 'desc' },
     });
   }
 
   async findOne(id: number) {
-    const unit = await this.prisma.unit.findUnique({
+    const unit = await this.prisma.reader.unit.findUnique({
       where: { id },
     });
 

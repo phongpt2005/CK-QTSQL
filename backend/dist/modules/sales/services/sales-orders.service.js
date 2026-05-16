@@ -32,7 +32,7 @@ let SalesOrdersService = SalesOrdersService_1 = class SalesOrdersService {
         if (query?.status)
             where.status = query.status;
         const [data, total] = await Promise.all([
-            this.prisma.salesOrder.findMany({
+            this.prisma.reader.salesOrder.findMany({
                 where,
                 include: {
                     customer: { select: { id: true, customerCode: true, name: true } },
@@ -48,7 +48,7 @@ let SalesOrdersService = SalesOrdersService_1 = class SalesOrdersService {
                 take: limit,
                 orderBy: { id: 'desc' },
             }),
-            this.prisma.salesOrder.count({ where }),
+            this.prisma.reader.salesOrder.count({ where }),
         ]);
         return {
             data,
@@ -56,7 +56,7 @@ let SalesOrdersService = SalesOrdersService_1 = class SalesOrdersService {
         };
     }
     async findOne(id) {
-        const so = await this.prisma.salesOrder.findUnique({
+        const so = await this.prisma.reader.salesOrder.findUnique({
             where: { id },
             include: {
                 customer: true,
@@ -81,7 +81,7 @@ let SalesOrdersService = SalesOrdersService_1 = class SalesOrdersService {
         if (!so) {
             throw new common_1.NotFoundException(`Sales Order #${id} not found`);
         }
-        const reservations = await this.prisma.stockReservation.findMany({
+        const reservations = await this.prisma.reader.stockReservation.findMany({
             where: {
                 referenceType: constants_1.REFERENCE_TYPE.SALES_ORDER,
                 referenceId: id,
@@ -95,14 +95,14 @@ let SalesOrdersService = SalesOrdersService_1 = class SalesOrdersService {
         return { ...so, reservations };
     }
     async create(dto, userId) {
-        const customer = await this.prisma.customer.findFirst({
+        const customer = await this.prisma.reader.customer.findFirst({
             where: { id: dto.customerId, isDeleted: false },
         });
         if (!customer) {
             throw new common_1.NotFoundException(`Customer #${dto.customerId} not found`);
         }
         for (const item of dto.items) {
-            const product = await this.prisma.product.findFirst({
+            const product = await this.prisma.reader.product.findFirst({
                 where: { id: item.productId, isDeleted: false },
             });
             if (!product) {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Table, Tag, Select, Typography, Space } from 'antd';
-import { SwapOutlined, ImportOutlined, ExportOutlined } from '@ant-design/icons';
+import { Table, Tag, Select, Typography, Space, Alert } from 'antd';
+import { SwapOutlined, ImportOutlined, ExportOutlined, ThunderboltFilled } from '@ant-design/icons';
 import { useTransactions, useWarehouses } from '@/hooks/queries';
 import type { InventoryTransaction } from '@/types';
 import dayjs from 'dayjs';
@@ -62,6 +62,18 @@ export default function TransactionsPage() {
       <PageHeader 
         title="Lịch sử giao dịch" 
         subtitle="Theo dõi tất cả biến động nhập/xuất tồn kho theo thời gian thực"
+      />
+      <Alert
+        message={
+          <span style={{ fontWeight: 600 }}>
+            <ThunderboltFilled style={{ color: '#faad14', marginRight: 4 }} /> 
+            Tối ưu hóa Database: Partition Pruning
+          </span>
+        }
+        description="Bảng giao dịch đang sử dụng kỹ thuật Range Partitioning. Hệ thống sẽ tự động định tuyến truy vấn đến đúng phân vùng thời gian, giúp tăng tốc độ tải dữ liệu cực nhanh."
+        type="info"
+        showIcon
+        style={{ marginBottom: 16, borderRadius: 8, background: '#f0f9ff', borderColor: '#bae6fd' }}
       />
       <div className="filter-bar">
         <Select placeholder="Lọc theo kho" allowClear style={{ width: 240 }} onChange={(v) => { setWhFilter(v); setPage(1); }}

@@ -25,7 +25,7 @@ export class ProductsService {
     }
 
     const [data, total] = await Promise.all([
-      this.prisma.product.findMany({
+      this.prisma.reader.product.findMany({
         where,
         include: {
           category: { select: { id: true, categoryName: true } },
@@ -42,7 +42,7 @@ export class ProductsService {
         take: limit,
         orderBy: { id: 'desc' },
       }),
-      this.prisma.product.count({ where }),
+      this.prisma.reader.product.count({ where }),
     ]);
 
     return {
@@ -57,7 +57,7 @@ export class ProductsService {
   }
 
   async findOne(id: number) {
-    const product = await this.prisma.product.findFirst({
+    const product = await this.prisma.reader.product.findFirst({
       where: { id },
       include: {
         category: true,
@@ -73,7 +73,7 @@ export class ProductsService {
   }
 
   async create(dto: CreateProductDto) {
-    const existing = await this.prisma.product.findUnique({
+    const existing = await this.prisma.reader.product.findUnique({
       where: { productCode: dto.productCode },
     });
 

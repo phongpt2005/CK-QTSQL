@@ -32,7 +32,6 @@ const SalesOrderDetailPage = lazy(() => import('@/pages/sales/SalesOrderDetailPa
 const UsersPage = lazy(() => import('@/pages/users/UsersPage'));
 const SupportPage = lazy(() => import('@/pages/SupportPage'));
 const AdminSupportTicketsPage = lazy(() => import('@/pages/admin/AdminSupportTicketsPage'));
-const AdminArchitecturePage = lazy(() => import('@/pages/admin/AdminArchitecturePage'));
 
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
 
@@ -149,7 +148,6 @@ export default function App() {
                     {/* Admin */}
                     <Route path="users" element={<AdminRoute><UsersPage /></AdminRoute>} />
                     <Route path="admin/support" element={<AdminRoute><AdminSupportTicketsPage /></AdminRoute>} />
-                    <Route path="admin/architecture" element={<AdminRoute><AdminArchitecturePage /></AdminRoute>} />
 
                     {/* Support */}
                     <Route path="support" element={<SupportPage />} />

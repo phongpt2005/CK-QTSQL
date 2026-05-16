@@ -18,12 +18,12 @@ let SuppliersService = class SuppliersService {
         this.prisma = prisma;
     }
     async findAll() {
-        return this.prisma.supplier.findMany({
+        return this.prisma.reader.supplier.findMany({
             orderBy: { id: 'desc' },
         });
     }
     async findOne(id) {
-        const supplier = await this.prisma.supplier.findFirst({
+        const supplier = await this.prisma.reader.supplier.findFirst({
             where: { id },
         });
         if (!supplier) {
@@ -32,7 +32,7 @@ let SuppliersService = class SuppliersService {
         return supplier;
     }
     async create(dto) {
-        const existing = await this.prisma.supplier.findUnique({
+        const existing = await this.prisma.reader.supplier.findUnique({
             where: { supplierCode: dto.supplierCode },
         });
         if (existing) {

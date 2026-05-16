@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Table, Button, Modal, Form, Input, InputNumber, Select, Space, Tag, Popconfirm, Typography, Tooltip } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, AppstoreOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useCategories, useUnits } from '@/hooks/queries';
 import type { Product, CreateProductDto, UpdateProductDto } from '@/types';
 import numeral from 'numeral';
@@ -84,8 +84,15 @@ export default function ProductsPage() {
   return (
     <div className="stagger-children">
       <PageHeader 
-        title="Sản phẩm" 
-        subtitle="Quản lý danh sách sản phẩm và thông tin chi tiết"
+        title={
+          <Space>
+            Sản phẩm
+            <Tag color="cyan" style={{ fontSize: 12, borderRadius: 12, marginLeft: 8 }} icon={<DatabaseOutlined />}>
+              📖 Đọc từ Read-Replica
+            </Tag>
+          </Space>
+        }
+        subtitle="Quản lý danh sách sản phẩm. Dữ liệu được truy vấn siêu tốc từ máy chủ Slave."
         extra={isAdmin && <Button type="primary" icon={<PlusOutlined />} onClick={openCreate} className="neu-btn" style={{ background: '#1e3a8a', color: '#fff' }}>Thêm sản phẩm</Button>}
       />
 

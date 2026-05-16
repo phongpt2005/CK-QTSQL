@@ -516,6 +516,7 @@ export default function CreateSalesOrderPage() {
         unitPrice: i.unitPrice,
       })),
     });
+    message.success('Tạo đơn thành công! (Dữ liệu đã được ghi an toàn vào Master DB)');
     navigate('/sales-orders');
   };
 
@@ -533,7 +534,7 @@ export default function CreateSalesOrderPage() {
         const validWhIds = new Set(r.stockLocations?.map(l => l.warehouseId) || []);
         const whOptions = (warehouses ?? [])
           .filter(w => validWhIds.has(w.id))
-          .map(w => ({ label: w.warehouseName, value: w.id }));
+          .map(w => ({ label: `${w.warehouseName} ${w.id <= 10 ? '[📍 Shard MB]' : '[📍 Shard MN]'}`, value: w.id }));
         return (
           <Select placeholder="Chọn kho" value={r.warehouseId || undefined} onChange={(v) => updateItem(r.key, 'warehouseId', v)} style={{ width: '100%' }}
             disabled={!r.productId || r.stockChecking || whOptions.length === 0} options={whOptions} />

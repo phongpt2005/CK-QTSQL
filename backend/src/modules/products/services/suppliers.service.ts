@@ -7,13 +7,13 @@ export class SuppliersService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.supplier.findMany({
+    return this.prisma.reader.supplier.findMany({
       orderBy: { id: 'desc' },
     });
   }
 
   async findOne(id: number) {
-    const supplier = await this.prisma.supplier.findFirst({
+    const supplier = await this.prisma.reader.supplier.findFirst({
       where: { id },
     });
 
@@ -25,7 +25,7 @@ export class SuppliersService {
   }
 
   async create(dto: CreateSupplierDto) {
-    const existing = await this.prisma.supplier.findUnique({
+    const existing = await this.prisma.reader.supplier.findUnique({
       where: { supplierCode: dto.supplierCode },
     });
 
